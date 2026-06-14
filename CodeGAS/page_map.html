@@ -1,0 +1,702 @@
+<section id="page-map" class="page">
+  <div class="card" style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div>
+        <div class="panel-title" style="font-size:18px;">🗺️ แผนที่เหตุการณ์ไฟฟ้าขัดข้อง</div>
+        <div class="hint">ดึงข้อมูลจาก Attendance → OutageJson → เทียบพิกัดจากชีต Device</div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select id="mapMonth">
+          <option value="0">ทั้งปี</option>
+          <option value="1">มกราคม</option>
+          <option value="2">กุมภาพันธ์</option>
+          <option value="3">มีนาคม</option>
+          <option value="4">เมษายน</option>
+          <option value="5">พฤษภาคม</option>
+          <option value="6">มิถุนายน</option>
+          <option value="7">กรกฎาคม</option>
+          <option value="8">สิงหาคม</option>
+          <option value="9">กันยายน</option>
+          <option value="10">ตุลาคม</option>
+          <option value="11">พฤศจิกายน</option>
+          <option value="12">ธันวาคม</option>
+        </select>
+        <button id="mapLoadBtn" class="btn primary" type="button">โหลดแผนที่</button>
+      </div>
+    </div>
+
+    <div class="map-stat-grid">
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapTotalEvents">0</div>
+        <div class="map-stat-label">รายการไฟฟ้าขัดข้อง</div>
+      </div>
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapTotalPoints">0</div>
+        <div class="map-stat-label">จุดที่พบพิกัด</div>
+      </div>
+      <div class="map-stat-card emergency-card">
+        <div class="map-stat-num" id="mapEmergencyCount">0</div>
+        <div class="map-stat-label">จุดฉุกเฉินซ้ำใน 7 วัน</div>
+      </div>
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapUnmatched">0</div>
+        <div class="map-stat-label">รหัสที่ไม่พบใน Device</div>
+      </div>
+    </div>
+
+    <div id="mapEmergencyBox" class="map-emergency-box" style="display:none;"></div>
+
+    <div id="outageMap"></div>
+
+    <div class="collapse-card">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>🚨 จุดฉุกเฉินซ้ำในรอบ 7 วัน</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div class="table-scroll">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th>อันดับ</th>
+                <th>รหัสอุปกรณ์</th>
+                <th>สถานที่</th>
+                <th>7 วัน</th>
+                <th>สาเหตุ</th>
+                <th>ครั้งล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody id="mapEmergencyTbody">
+              <tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapse-card">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>🔥 จุดเกิดเหตุบ่อยที่สุด 10 อันดับแรก</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div class="table-scroll">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th>อันดับ</th>
+                <th>รหัสอุปกรณ์</th>
+                <th>สถานที่</th>
+                <th>จำนวนครั้ง</th>
+                <th>นาทีรวม</th>
+                <th>ครั้งล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody id="mapTopTbody">
+              <tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapse-card collapsed">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>⚠️ รหัสที่อ่านได้จาก OutageJson แต่ไม่พบในชีต Device</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div id="mapUnmatchedList" class="hint">-</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  #outageMap{
+    height: 62vh;
+    min-height: 420px;
+    margin-top: 14px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: #f7f2ff;
+    position: relative;
+    z-index: 1;
+  }
+
+  .map-stat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
+    margin-top:14px;
+  }
+
+  .map-stat-card{
+    background:linear-gradient(180deg,#fff,#fbf7ff);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:var(--shadow);
+  }
+
+  .map-stat-card.emergency-card{
+    background:linear-gradient(180deg,#fff5f5,#fff);
+    border-color:rgba(220,38,38,.25);
+  }
+
+  .map-stat-num{
+    font-size:28px;
+    font-weight:900;
+    color:#6b1fa7;
+  }
+
+  .emergency-card .map-stat-num{
+    color:#dc2626;
+  }
+
+  .map-stat-label{
+    color:var(--muted);
+    font-weight:700;
+    font-size:13px;
+  }
+
+  .map-emergency-box{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(220,38,38,.25);
+    background:linear-gradient(90deg,#fff1f2,#fff7ed);
+    color:#7f1d1d;
+    font-weight:800;
+    box-shadow:var(--shadow);
+  }
+
+  .map-popup-title{
+    font-weight:900;
+    color:#6b1fa7;
+    margin-bottom:4px;
+  }
+
+  .map-popup-title.emergency{
+    color:#dc2626;
+  }
+
+  .map-popup-line{
+    font-size:13px;
+    margin:2px 0;
+  }
+
+  .map-device-label{
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(107,31,167,.35);
+    border-radius: 10px;
+    color: #3b185f;
+    font-weight: 900;
+    font-size: 12px;
+    line-height: 1.25;
+    padding: 4px 7px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    white-space: nowrap;
+  }
+
+  .map-device-label .code{
+    color:#6b1fa7;
+    font-weight:900;
+  }
+
+  .map-device-label .place{
+    color:#333;
+    font-weight:700;
+  }
+
+  .map-device-label-hidden{
+    display:none !important;
+  }
+
+  .emergency-marker{
+    width:24px;
+    height:24px;
+    border-radius:999px;
+    background:#dc2626;
+    border:3px solid #fff;
+    box-shadow:0 0 0 0 rgba(220,38,38,.75);
+    animation: emergencyPulse 1.15s infinite;
+    position:relative;
+  }
+
+  .emergency-marker::after{
+    content:"!";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:900;
+    font-size:15px;
+  }
+
+  @keyframes emergencyPulse{
+    0%{ transform:scale(.92); box-shadow:0 0 0 0 rgba(220,38,38,.75); }
+    70%{ transform:scale(1.08); box-shadow:0 0 0 16px rgba(220,38,38,0); }
+    100%{ transform:scale(.92); box-shadow:0 0 0 0 rgba(220,38,38,0); }
+  }
+
+  #page-map,
+  #page-map .card{
+    position: relative;
+    z-index: 1;
+  }
+
+  #page-map .leaflet-container,
+  #page-map .leaflet-pane,
+  #page-map .leaflet-top,
+  #page-map .leaflet-bottom{
+    z-index: 1 !important;
+  }
+
+  #page-map .leaflet-control{
+    z-index: 2 !important;
+  }
+
+  .topbar{ z-index: 9000 !important; }
+  .sidebar{ z-index: 9100 !important; }
+
+  @media(max-width:768px){
+    #outageMap{
+      height:58vh;
+      min-height:360px;
+    }
+  }
+</style>
+
+<script>
+(function(){
+  let outageMap = null;
+  let outageLayer = null;
+  let labelLayer = null;
+  let feeder33Layer = null;
+  let mapLayerControl = null;
+
+  const LABEL_SHOW_ZOOM = 13;
+
+  function getToken_(){
+    return window.token || window.__token || sessionStorage.getItem('pea_token') || '';
+  }
+
+  function escapeHtml_(s){
+    return String(s || '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  }
+
+  function initCurrentMonth_(){
+    const sel = document.getElementById('mapMonth');
+    if(sel && !sel.dataset.ready){
+      sel.value = String(new Date().getMonth() + 1);
+      sel.dataset.ready = '1';
+    }
+  }
+
+  function initOutageMap_(){
+    if(outageMap) return;
+
+    outageMap = L.map('outageMap', { zoomControl:true }).setView([8.57, 99.25], 11);
+
+    /*L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(outageMap);*/
+
+    const streetMap = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; OpenStreetMap'
+  }
+);
+
+const satelliteMap = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {
+    attribution: 'Tiles © Esri'
+  }
+);
+
+const darkMap = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; CartoDB'
+  }
+);
+
+streetMap.addTo(outageMap);
+
+mapLayerControl = L.control.layers({
+  "🗺️ ถนน": streetMap,
+  "🛰️ ดาวเทียม": satelliteMap,
+  "🌙 Dark": darkMap
+}, {}, {
+  collapsed: false
+}).addTo(outageMap);
+
+
+    outageLayer = L.layerGroup().addTo(outageMap);
+    labelLayer = L.layerGroup().addTo(outageMap);
+
+    outageMap.on('zoomend', updateLabelVisibility_);
+    load33kVGeojsonLayer_();
+  }
+ function load33kVGeojsonLayer_(){
+  if(!outageMap) return;
+  if(feeder33Layer) return;
+
+  const geojsonUrl = 'https://nattapongpsng-sketch.github.io/33kVGeojson/PSGgeojson.geojson';
+
+  const conductorColors = {
+    A: '#444444',
+    AA: '#666666',
+    ACSR: '#f57c00',
+    PIC: '#7b1fa2',
+    SAC: '#0288d1',
+    XLPE: '#455a64',
+    UNKNOWN: '#555555'
+  };
+
+  function getConductorType_(feature){
+    const props = feature.properties || {};
+    return String(props.CONDUCTORT || 'UNKNOWN').trim().toUpperCase() || 'UNKNOWN';
+  }
+
+  function getConductorColor_(type){
+    return conductorColors[type] || conductorColors.UNKNOWN;
+  }
+
+  feeder33Layer = L.geoJSON(null, {
+    style: function(feature){
+      const type = getConductorType_(feature);
+
+      return {
+        color: getConductorColor_(type),
+        weight: 1.4,
+        opacity: 0.95
+      };
+    },
+
+    onEachFeature: function(feature, layer){
+      const props = feature.properties || {};
+      const type = getConductorType_(feature);
+      const color = getConductorColor_(type);
+
+      let html = `
+        <div class="map-popup-title">⚡ ระบบจำหน่าย 33kV</div>
+        <div class="map-popup-line"><b>TAG:</b> ${escapeHtml_(props.TAG || '-')}</div>
+        <div class="map-popup-line"><b>FEEDERID:</b> ${escapeHtml_(props.FEEDERID || '-')}</div>
+        <div class="map-popup-line"><b>CONDUCTORT:</b> <span style="color:${color};font-weight:900;">${escapeHtml_(type)}</span></div>
+        <div class="map-popup-line"><b>CONDUCTORS:</b> ${escapeHtml_(props.CONDUCTORS || '-')}</div>
+        <div class="map-popup-line"><b>LABELTEXT:</b> ${escapeHtml_(props.LABELTEXT || '-')}</div>
+        <div class="map-popup-line"><b>MAINORLATE:</b> ${escapeHtml_(props.MAINORLATE || '-')}</div>
+        <div class="map-popup-line"><b>MEASURELEN:</b> ${escapeHtml_(props.MEASURELEN || props.SHAPE_LEN || '-')} ม.</div>
+      `;
+
+      layer.bindPopup(html);
+
+      layer.on('mouseover', function(){
+        layer.setStyle({
+          weight: 4,
+          opacity: 1
+        });
+      });
+
+      layer.on('mouseout', function(){
+        layer.setStyle({
+          weight: 1.4,
+          opacity: 0.95
+        });
+      });
+    }
+  }).addTo(outageMap);
+
+  fetch(geojsonUrl)
+    .then(res => {
+      if(!res.ok) throw new Error('โหลด GeoJSON 33kV ไม่สำเร็จ');
+      return res.json();
+    })
+    .then(data => {
+      feeder33Layer.addData(data);
+
+      if(mapLayerControl){
+        mapLayerControl.addOverlay(feeder33Layer, '⚡ ระบบจำหน่าย 33kV');
+      }
+
+      try{
+        outageMap.fitBounds(feeder33Layer.getBounds(), { padding:[30,30] });
+      }catch(e){}
+
+      setTimeout(() => {
+        outageMap.invalidateSize();
+      }, 300);
+    })
+    .catch(err => {
+      console.error(err);
+      alert(err.message || 'โหลด Layer 33kV ไม่สำเร็จ');
+    });
+}
+  function markerRadius_(count){
+    return Math.max(8, Math.min(28, 7 + count * 3));
+  }
+
+  function markerColor_(count){
+    if(count >= 5) return '#d32f2f';
+    if(count >= 3) return '#f57c00';
+    return '#6b1fa7';
+  }
+
+  function makeLabelHtml_(p){
+    return `
+      <div class="map-device-label">
+        <div class="code">${escapeHtml_(p.code || '')}</div>
+        <div class="place">${escapeHtml_(p.place || p.location || '-')}</div>
+      </div>
+    `;
+  }
+
+  function updateLabelVisibility_(){
+    if(!outageMap) return;
+
+    const show = outageMap.getZoom() >= LABEL_SHOW_ZOOM;
+    document.querySelectorAll('#page-map .map-device-label').forEach(el => {
+      el.classList.toggle('map-device-label-hidden', !show);
+    });
+  }
+
+  function renderMap_(data){
+    initOutageMap_();
+
+    outageLayer.clearLayers();
+    labelLayer.clearLayers();
+
+    const points = data.points || [];
+    const emergencyPoints = data.emergencyPoints || [];
+
+    document.getElementById('mapTotalEvents').textContent = data.totalEvents || 0;
+    document.getElementById('mapTotalPoints').textContent = points.length || 0;
+    document.getElementById('mapEmergencyCount').textContent = emergencyPoints.length || 0;
+    document.getElementById('mapUnmatched').textContent = (data.unmatched || []).length || 0;
+
+    renderEmergencyBox_(emergencyPoints);
+
+    if(!points.length){
+      outageMap.setView([8.57, 99.25], 11);
+      renderTopTable_([]);
+      renderEmergencyTable_([]);
+      renderUnmatched_(data.unmatched || []);
+      updateLabelVisibility_();
+      return;
+    }
+
+    const bounds = [];
+
+    points.forEach(p => {
+      if(p.isEmergency){
+        const icon = L.divIcon({
+          className:'',
+          html:'<div class="emergency-marker"></div>',
+          iconSize:[24,24],
+          iconAnchor:[12,12]
+        });
+
+        const marker = L.marker([p.lat, p.lng], { icon });
+        marker.bindPopup(makePopup_(p, true));
+        marker.addTo(outageLayer);
+      }else{
+        const color = markerColor_(p.count);
+        const marker = L.circleMarker([p.lat, p.lng], {
+          radius: markerRadius_(p.count),
+          color,
+          weight: 2,
+          fillColor: color,
+          fillOpacity: 0.55
+        });
+
+        marker.bindPopup(makePopup_(p, false));
+        marker.addTo(outageLayer);
+      }
+
+      const labelIcon = L.divIcon({
+        className: '',
+        html: makeLabelHtml_(p),
+        iconSize: null,
+        iconAnchor: [-12, 34]
+      });
+
+      L.marker([p.lat, p.lng], {
+        icon: labelIcon,
+        interactive: false
+      }).addTo(labelLayer);
+
+      bounds.push([p.lat, p.lng]);
+    });
+
+    outageMap.fitBounds(bounds, { padding:[30,30] });
+
+    renderTopTable_(points.slice(0,10));
+    renderEmergencyTable_(emergencyPoints);
+    renderUnmatched_(data.unmatched || []);
+
+    setTimeout(() => {
+      outageMap.invalidateSize();
+      updateLabelVisibility_();
+    }, 250);
+  }
+
+  function makePopup_(p, emergency){
+    const cause = (p.causes && p.causes.length) ? p.causes.join(', ') : '-';
+
+    return `
+      <div class="map-popup-title ${emergency ? 'emergency' : ''}">
+        ${emergency ? '🚨 ' : ''}${escapeHtml_(p.code)}
+      </div>
+      <div class="map-popup-line"><b>สถานที่:</b> ${escapeHtml_(p.location || p.place || '-')}</div>
+      <div class="map-popup-line"><b>จำนวนทั้งเดือน:</b> ${p.count || 0}</div>
+      <div class="map-popup-line"><b>จำนวนใน 7 วัน:</b> ${p.count7d || 0}</div>
+      <div class="map-popup-line"><b>นาทีรวม:</b> ${p.totalMinutes || 0}</div>
+      <div class="map-popup-line"><b>สาเหตุ:</b> ${escapeHtml_(cause)}</div>
+      <div class="map-popup-line"><b>ครั้งล่าสุด:</b> ${escapeHtml_(p.lastDate || '-')}</div>
+    `;
+  }
+
+  function renderEmergencyBox_(items){
+    const box = document.getElementById('mapEmergencyBox');
+    if(!box) return;
+
+    if(!items.length){
+      box.style.display = 'none';
+      box.innerHTML = '';
+      return;
+    }
+
+    box.style.display = 'block';
+    box.innerHTML = `🚨 พบอุปกรณ์เกิดเหตุซ้ำมากกว่า 1 ครั้งในรอบ 7 วัน จำนวน ${items.length} จุด: ` +
+      items.slice(0,8).map(x => `<b>${escapeHtml_(x.code)}</b>`).join(', ') +
+      (items.length > 8 ? ' ...' : '');
+  }
+
+  function renderEmergencyTable_(points){
+    const tb = document.getElementById('mapEmergencyTbody');
+    if(!tb) return;
+
+    if(!points.length){
+      tb.innerHTML = `<tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>`;
+      return;
+    }
+
+    tb.innerHTML = points.map((p, i) => {
+      const cause = (p.causes && p.causes.length) ? p.causes.join(', ') : 'ไม่ระบุ';
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td><b style="color:#dc2626;">${escapeHtml_(p.code)}</b></td>
+          <td>${escapeHtml_(p.location || p.place || '-')}</td>
+          <td><b>${p.count7d || 0}</b></td>
+          <td>${escapeHtml_(cause)}</td>
+          <td>${escapeHtml_(p.lastDate || '-')}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderTopTable_(points){
+    const tb = document.getElementById('mapTopTbody');
+    if(!tb) return;
+
+    if(!points.length){
+      tb.innerHTML = `<tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>`;
+      return;
+    }
+
+    tb.innerHTML = points.map((p, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><b>${p.isEmergency ? '🚨 ' : ''}${escapeHtml_(p.code)}</b></td>
+        <td>${escapeHtml_(p.location || p.place || '-')}</td>
+        <td><b>${p.count}</b></td>
+        <td>${p.totalMinutes || 0}</td>
+        <td>${escapeHtml_(p.lastDate || '-')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderUnmatched_(items){
+    const el = document.getElementById('mapUnmatchedList');
+    if(!el) return;
+
+    if(!items.length){
+      el.textContent = 'ไม่พบรายการตกหล่น';
+      return;
+    }
+
+    el.innerHTML = items.slice(0,50).map(x =>
+      `• ${escapeHtml_(x.code)} — ${escapeHtml_(x.site || '-')} วันที่ ${escapeHtml_(x.day)}/${escapeHtml_(x.month)}`
+    ).join('<br>');
+  }
+
+  window.loadOutageMap = function(){
+    initCurrentMonth_();
+
+    const token = getToken_();
+    if(!token){
+      if(window.showErr) showErr('กรุณาเข้าสู่ระบบก่อน');
+      else alert('กรุณาเข้าสู่ระบบก่อน');
+      return;
+    }
+
+    const month = Number(document.getElementById('mapMonth')?.value || (new Date().getMonth() + 1));
+
+    if(window.showLoading) showLoading('กำลังโหลดแผนที่ไฟฟ้าขัดข้อง…');
+
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(window.hideLoading) hideLoading();
+        renderMap_(res || {});
+      })
+      .withFailureHandler(function(err){
+        if(window.hideLoading) hideLoading();
+        if(window.showErr) showErr(err.message || 'โหลดแผนที่ไม่สำเร็จ');
+        else alert(err.message || 'โหลดแผนที่ไม่สำเร็จ');
+      })
+      .getOutageMapData(token, {
+        beYear: window.BE_YEAR || 2569,
+        month
+      });
+  };
+
+  window.mapToggleCollapse_ = function(btn, ev){
+    if(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+    }
+
+    const card = btn.closest('.collapse-card');
+    if(card) card.classList.toggle('collapsed');
+
+    return false;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    initCurrentMonth_();
+
+    const btn = document.getElementById('mapLoadBtn');
+    if(btn) btn.addEventListener('click', window.loadOutageMap);
+  });
+})();
+</script>
