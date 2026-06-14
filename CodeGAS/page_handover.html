@@ -1,0 +1,1712 @@
+<!-- page_handover.html (REPLACE WHOLE FILE) -->
+<section id="page-handover" class="page">
+  <style>
+    #page-handover{
+      --ho-purple:#7b1fa2;
+      --ho-purple2:#c2188f;
+      --ho-purple3:#d12a8d;
+      --ho-deep:#12001f;
+      --ho-gold:#ffd54a;
+      --ho-ink:#20112f;
+      --ho-muted:#7d718c;
+      --ho-line:rgba(123,31,162,.14);
+      --ho-line2:rgba(123,31,162,.28);
+      --ho-good:#15803d;
+      --ho-good-bg:rgba(22,163,74,.10);
+      --ho-bad:#b91c1c;
+      --ho-bad-bg:rgba(220,38,38,.10);
+      width:100%;
+      max-width:1180px;
+      margin:0 auto;
+      padding:14px;
+      color:var(--ho-ink);
+      overflow-x:hidden;
+    }
+    #page-handover, #page-handover *{ box-sizing:border-box; }
+    #page-handover .muted{ color:var(--ho-muted); }
+    #page-handover .mini{ font-size:12px; line-height:1.45; }
+
+    #page-handover .ho-hero{
+      position:relative;
+      border-radius:28px;
+      padding:22px 24px;
+      margin-bottom:14px;
+      color:#fff;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(255,213,74,.45), transparent 25%),
+        linear-gradient(135deg,#6d1fb1 0%,#a921bc 45%,#d12a8d 100%);
+      box-shadow:0 18px 46px rgba(74,0,110,.28);
+      overflow:hidden;
+    }
+    #page-handover .ho-hero::after{
+      content:"";
+      position:absolute;
+      right:-90px;
+      bottom:-120px;
+      width:280px;
+      height:280px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+    }
+    #page-handover .ho-hero h2{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-size:clamp(22px,3vw,32px);
+      font-weight:950;
+      letter-spacing:-.3px;
+    }
+    #page-handover .ho-hero p{
+      position:relative;
+      z-index:1;
+      margin:8px 0 0;
+      opacity:.94;
+      line-height:1.55;
+    }
+
+    #page-handover .ho-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    #page-handover .grid2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    #page-handover .grid3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    @media(max-width:860px){
+      #page-handover .grid2,#page-handover .grid3{ grid-template-columns:1fr; }
+    }
+
+    #page-handover .card{
+      border:1px solid rgba(255,255,255,.34);
+      border-radius:24px;
+      background:rgba(255,255,255,.94);
+      box-shadow:0 18px 42px rgba(39,0,70,.14), inset 0 1px 0 rgba(255,255,255,.75);
+      overflow:hidden;
+      min-width:0;
+      backdrop-filter:blur(10px);
+    }
+    #page-handover .card-h{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(123,31,162,.10);
+      background:linear-gradient(180deg,rgba(253,248,255,.98),rgba(255,255,255,.95));
+    }
+    #page-handover .card-h h3{
+      margin:0;
+      font-size:17px;
+      color:#5b168d;
+      font-weight:950;
+    }
+    #page-handover .card-b{ padding:14px; min-width:0; }
+
+    #page-handover .field label{
+      display:block;
+      margin:0 0 7px 2px;
+      font-size:13px;
+      color:#5b168d;
+      font-weight:900;
+    }
+    #page-handover input,
+    #page-handover select{
+      width:100%;
+      height:43px;
+      padding:8px 12px;
+      border-radius:15px;
+      border:1px solid var(--ho-line2);
+      background:#fff;
+      color:inherit;
+      outline:none;
+      font-size:14px;
+      min-width:0;
+      box-shadow:0 4px 12px rgba(80,0,120,.04);
+    }
+    #page-handover input:focus,
+    #page-handover select:focus{
+      border-color:rgba(194,24,143,.65);
+      box-shadow:0 0 0 4px rgba(194,24,143,.12);
+    }
+    #page-handover input[disabled]{ background:#fbf7ff; opacity:.95; }
+
+    #page-handover .toolbar{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:12px;
+    }
+    #page-handover .btn{
+      min-height:42px;
+      border-radius:999px;
+      padding:0 16px;
+      border:1px solid rgba(123,31,162,.20);
+      background:#fff;
+      color:#6d1fb1;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+      box-shadow:0 8px 18px rgba(80,0,120,.10);
+      transition:.16s ease;
+    }
+    #page-handover .btn:hover{ transform:translateY(-1px); box-shadow:0 12px 24px rgba(80,0,120,.14); }
+    #page-handover .btn.primary{ border:none; color:#fff; background:linear-gradient(135deg,#7b1fa2,#c2188f); }
+    #page-handover .btn.gold{ border:none; color:#3a2600; background:linear-gradient(135deg,#ffe27a,#ffd54a); }
+    #page-handover .btn.danger{ border:none; color:#fff; background:linear-gradient(135deg,#ef4444,#991b1b); }
+    #page-handover .btn:disabled{ opacity:.48; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    #page-handover .acc{
+      margin-top:12px;
+      border:1px solid var(--ho-line);
+      border-radius:20px;
+      overflow:hidden;
+      background:#fff;
+    }
+    #page-handover .acc:first-child{ margin-top:0; }
+    #page-handover .acc-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:13px 14px;
+      cursor:pointer;
+      user-select:none;
+      background:linear-gradient(180deg,#fff7ff,#ffffff);
+    }
+    #page-handover .acc-title .t{ font-size:15px; font-weight:950; color:#5b168d; }
+    #page-handover .acc-title .s{ font-size:12px; color:var(--ho-muted); margin-top:2px; }
+    #page-handover .acc-toggle{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      border:1px solid rgba(123,31,162,.22);
+      background:#fff;
+      color:#7b1fa2;
+      font-weight:950;
+      cursor:pointer;
+    }
+    #page-handover .acc-body{
+      padding:13px;
+      border-top:1px solid rgba(123,31,162,.10);
+      display:block;
+      min-width:0;
+    }
+    #page-handover .acc[data-collapsed="1"] .acc-body{ display:none; }
+
+    /* จำกัดความสูงเฉพาะกล่องตรวจรายการ เพื่อไม่ให้ยาวเกินหน้าจอ */
+    #page-handover #ho_acc_items .acc-body{
+      max-height:58vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      scrollbar-gutter:stable;
+    }
+
+    #page-handover .tableWrap{
+      width:100%;
+      max-width:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      border:1px solid rgba(123,31,162,.14);
+      border-radius:18px;
+      background:#fff;
+      min-width:0;
+    }
+    #page-handover table.tbl{
+      width:max-content;
+      min-width:1020px;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+    #page-handover .tbl th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      padding:10px 8px;
+      text-align:left;
+      font-size:12px;
+      color:#5b168d;
+      white-space:nowrap;
+      background:linear-gradient(180deg,#fff3ff,#fff);
+      border-bottom:1px solid rgba(123,31,162,.16);
+    }
+    #page-handover .tbl td{
+      padding:8px;
+      border-bottom:1px solid rgba(236,230,245,.86);
+      font-size:13px;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    #page-handover .tbl td:nth-child(2){ min-width:260px; white-space:normal; word-break:break-word; }
+    #page-handover .tbl td:nth-child(9){ min-width:220px; }
+    #page-handover .tbl td input,
+    #page-handover .tbl td select{
+      height:36px;
+      border-radius:12px;
+      font-size:13px;
+      padding:6px 8px;
+    }
+    #page-handover .diff{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:38px;
+      height:28px;
+      padding:0 8px;
+      border-radius:999px;
+      background:var(--ho-good-bg);
+      color:var(--ho-good);
+      font-weight:950;
+    }
+    #page-handover .diff.bad{ background:var(--ho-bad-bg); color:var(--ho-bad); }
+    #page-handover .status-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      border:1px solid rgba(123,31,162,.16);
+    }
+    #page-handover .st-pending{ background:#fff5cc; color:#854d0e; }
+    #page-handover .st-accepted{ background:#dcfce7; color:#166534; }
+    #page-handover .st-rejected{ background:#fee2e2; color:#991b1b; }
+
+    #page-handover .pending-list{ display:grid; gap:10px; }
+    #page-handover .pending-item{
+      border:1px solid rgba(123,31,162,.14);
+      border-radius:18px;
+      padding:12px;
+      background:linear-gradient(180deg,#ffffff,#fffaff);
+      box-shadow:0 8px 18px rgba(80,0,120,.07);
+    }
+    #page-handover .pending-title{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      font-weight:950;
+      color:#5b168d;
+    }
+    #page-handover .note-box{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      background:rgba(255,213,74,.18);
+      border:1px solid rgba(255,213,74,.35);
+      color:#6b4b00;
+      font-size:12px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    @media(max-width:760px){
+      #page-handover{ padding:8px; }
+      #page-handover .ho-hero{ border-radius:22px; padding:18px; }
+      #page-handover .toolbar .btn{ width:100%; }
+      #page-handover #ho_acc_items .acc-body{ max-height:62vh; }
+      #page-handover table.tbl{ min-width:1020px; }
+      #page-handover .tableWrap::after{
+        content:"เลื่อนซ้าย-ขวาเพื่อดูทุกคอลัมน์ →";
+        display:block;
+        position:sticky;
+        left:0;
+        bottom:0;
+        padding:7px 10px;
+        font-size:12px;
+        font-weight:900;
+        color:#7b1fa2;
+        background:#fff7ff;
+        border-top:1px solid rgba(123,31,162,.14);
+      }
+    }
+    /* lock main page scroll while SweetAlert popup is open */
+html.swal2-shown,
+body.swal2-shown{
+  overflow:hidden !important;
+  height:100% !important;
+}
+
+body.swal2-height-auto{
+  height:100% !important;
+}
+
+.swal2-container{
+  overflow:hidden !important;
+}
+
+.swal2-popup{
+  max-height:90vh !important;
+  overflow:hidden !important;
+}
+
+.swal2-html-container{
+  overflow:hidden !important;
+}
+
+/* =========================
+   Notify Bell
+========================= */
+
+#page-handover .ho-hero{
+  position:relative;
+  overflow:hidden;
+}
+
+#page-handover .ho-notify-bell{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:54px;
+  height:54px;
+  border:none;
+  border-radius:18px;
+  background:rgba(255,255,255,.16);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  font-size:24px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+  transition:.18s ease;
+}
+
+#page-handover .ho-notify-bell:hover{
+  transform:translateY(-2px) scale(1.03);
+  background:rgba(255,255,255,.24);
+}
+
+#page-handover .ho-notify-badge{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  min-width:24px;
+  height:24px;
+  padding:0 6px;
+  border-radius:999px;
+  background:#ff2d55;
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #fff;
+  box-shadow:0 4px 12px rgba(0,0,0,.22);
+
+  animation: hoBellPulse 1.6s infinite;
+}
+
+@keyframes hoBellPulse{
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.12); }
+  100%{ transform:scale(1); }
+}
+
+@media(max-width:760px){
+  #page-handover .ho-notify-bell{
+    width:48px;
+    height:48px;
+    top:14px;
+    right:14px;
+    font-size:22px;
+  }
+}
+
+/* =========================
+   Professional Search Card
+========================= */
+#page-handover #ho_acc_search{
+  border:1px solid rgba(123,31,162,.18);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 94% 12%, rgba(255,213,74,.16), transparent 24%),
+    linear-gradient(180deg,#fffaff 0%,#ffffff 100%);
+  box-shadow:0 14px 34px rgba(80,0,120,.10);
+}
+
+#page-handover #ho_acc_search .acc-head{
+  padding:18px 18px;
+  background:
+    linear-gradient(90deg,rgba(123,31,162,.08),rgba(255,255,255,.96)),
+    radial-gradient(circle at right top,rgba(194,24,143,.10),transparent 34%);
+}
+
+#page-handover #ho_acc_search .acc-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+#page-handover #ho_acc_search .acc-title::before{
+  content:"📋";
+  width:44px;
+  height:44px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  background:linear-gradient(135deg,#7b1fa2,#c2188f);
+  box-shadow:0 10px 22px rgba(123,31,162,.24);
+  font-size:20px;
+  flex:0 0 auto;
+}
+
+#page-handover #ho_acc_search .acc-title .t{
+  font-size:18px;
+  letter-spacing:-.2px;
+}
+
+#page-handover #ho_acc_search .acc-title .s{
+  margin-top:4px;
+  font-size:12.5px;
+}
+
+#page-handover #ho_acc_search .acc-body{
+  padding:18px;
+}
+
+#page-handover .ho-search-panel{
+  display:grid;
+  grid-template-columns:1.4fr 1fr auto;
+  gap:14px;
+  align-items:end;
+}
+
+#page-handover .ho-pro-field label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:8px;
+  font-size:13px;
+  color:#5b168d;
+  font-weight:950;
+}
+
+#page-handover .ho-pro-field select,
+#page-handover .ho-pro-field input{
+  height:48px;
+  border-radius:17px;
+  border:1px solid rgba(123,31,162,.28);
+  background:#fff;
+  font-size:14px;
+  font-weight:700;
+}
+
+#page-handover .ho-load-box{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  gap:8px;
+  min-width:190px;
+  padding-top:24px;
+}
+#page-handover .ho-load-box .btn{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#page-handover #ho_reloadBtn{
+  height:48px;
+  border-radius:18px;
+  padding:0 22px;
+  border:1px solid rgba(123,31,162,.22);
+  background:linear-gradient(180deg,#ffffff,#fff8ff);
+  color:#6d1fb1;
+  font-size:14px;
+  box-shadow:0 12px 24px rgba(80,0,120,.12);
+}
+
+#page-handover .ho-load-box{
+  align-items:stretch;
+}
+
+#page-handover .ho-load-box .mini{
+  width:100%;
+}
+
+#page-handover .ho-search-tip{
+  margin-top:16px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:linear-gradient(90deg,rgba(123,31,162,.08),rgba(255,213,74,.12));
+  border:1px solid rgba(123,31,162,.10);
+  color:#5b168d;
+  font-size:12.5px;
+  font-weight:800;
+  line-height:1.55;
+}
+
+@media(max-width:860px){
+  #page-handover .ho-search-panel{
+    grid-template-columns:1fr;
+  }
+
+  #page-handover .ho-load-box{
+    min-width:0;
+  }
+
+  #page-handover #ho_reloadBtn{
+    width:100%;
+  }
+}
+#page-handover .ho-load-status{
+  margin-top:8px;
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  width:100%;
+  padding-left:2px;
+}
+
+#page-handover .ho-load-status #ho_autoHint{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+  width:100%;
+  font-size:12px;
+  line-height:1.35;
+  text-align:left;
+  white-space:normal;
+  word-break:break-word;
+}
+
+#page-handover .ho-load-status #ho_autoHint::before{
+  content:"●";
+  color:#22c55e;
+  font-size:12px;
+}
+
+#page-handover .ho-dashboard-card{
+  margin:0 0 14px;
+  padding:16px;
+  border-radius:26px;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(255,255,255,.38);
+  box-shadow:0 18px 42px rgba(39,0,70,.14);
+}
+
+#page-handover .ho-dash-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+#page-handover .ho-dash-head h3{
+  margin:0;
+  font-size:19px;
+  font-weight:950;
+  color:#5b168d;
+}
+
+#page-handover .ho-dash-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+#page-handover .ho-dash-item{
+  border:1px solid rgba(123,31,162,.14);
+  border-radius:22px;
+  padding:14px;
+  background:linear-gradient(180deg,#ffffff,#fff8ff);
+  box-shadow:0 10px 24px rgba(80,0,120,.08);
+  min-width:0;
+}
+
+#page-handover .ho-dash-title{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:flex-start;
+  font-weight:950;
+  color:#5b168d;
+}
+
+#page-handover .ho-percent{
+  font-size:30px;
+  font-weight:1000;
+  color:#15803d;
+  margin-top:10px;
+}
+
+#page-handover .ho-percent.warn{ color:#b45309; }
+#page-handover .ho-percent.bad{ color:#b91c1c; }
+
+#page-handover .ho-bar{
+  height:10px;
+  border-radius:999px;
+  background:#eee7f5;
+  overflow:hidden;
+  margin:10px 0;
+}
+
+#page-handover .ho-bar span{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#7b1fa2,#c2188f,#ffd54a);
+}
+
+#page-handover .ho-missing-list{
+  margin-top:10px;
+  display:grid;
+  gap:7px;
+}
+
+#page-handover .ho-missing-row{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 9px;
+  border-radius:14px;
+  background:rgba(220,38,38,.07);
+  color:#7f1d1d;
+  font-size:12px;
+  font-weight:850;
+}
+
+#page-handover .ho-complete{
+  margin-top:10px;
+  padding:9px 10px;
+  border-radius:14px;
+  background:rgba(22,163,74,.10);
+  color:#166534;
+  font-size:12px;
+  font-weight:900;
+}
+
+@media(max-width:980px){
+  #page-handover .ho-dash-grid{ grid-template-columns:1fr; }
+  #page-handover .ho-dash-head{ flex-direction:column; align-items:stretch; }
+}
+
+  </style>
+
+  <div class="ho-hero">
+
+  <button id="ho_notifyBell" class="ho-notify-bell" type="button" title="รายการรอรับมอบ">
+    🔔
+    <span id="ho_notifyBadge" class="ho-notify-badge" style="display:none">0</span>
+  </button>
+    <h2>ส่งมอบ / รับมอบ เครื่องมือและพัสดุประจำรถ</h2>
+    <p>ผู้มอบบันทึกรายการก่อน จากนั้นผู้รับมอบต้องกดยอมรับในระบบ จึงจะสามารถออก PDF พร้อมลงนามทั้งสองฝ่ายได้</p>
+  </div>
+
+
+
+  <div class="ho-dashboard-card">
+  <div class="ho-dash-head">
+    <div>
+      <h3>Dashboard ความพร้อมเครื่องมือ/พัสดุประจำรถ</h3>
+      <div class="muted mini">อ้างอิงจากรายการส่งมอบ/รับมอบที่ผู้รับมอบยอมรับล่าสุดของแต่ละรถ</div>
+    </div>
+    <button class="btn" id="ho_dashRefreshBtn" type="button">🔄 รีเฟรช Dashboard</button>
+  </div>
+
+  <div id="ho_dashGrid" class="ho-dash-grid">
+    <div class="muted mini">กำลังโหลด Dashboard...</div>
+  </div>
+</div>
+
+  <div class="ho-grid">
+
+
+        <div class="card">
+      <div class="card-h">
+        <h3>1) รายการรอฉันรับมอบ</h3>
+        <div class="muted mini">รายการที่ระบุชื่อคุณเป็นผู้รับมอบ จะแสดงที่นี่เพื่อกดยอมรับหรือปฏิเสธ</div>
+      </div>
+      <div class="card-b">
+        <div class="toolbar" style="margin-top:0">
+          <button class="btn" id="ho_pendingRefreshBtn" type="button">🔄 โหลดรายการรอยอมรับ</button>
+          <span class="mini muted" id="ho_pendingHint">—</span>
+        </div>
+        <div id="ho_pendingList" class="pending-list" style="margin-top:12px">
+          <div class="muted mini">ยังไม่ได้โหลดรายการ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h3>2) บันทึกส่งมอบเครื่องมือ/พัสดุ</h3>
+        <div class="muted mini">เลือกรถ วันที่ และตรวจรายการ จากนั้นบันทึกเป็นสถานะ “รอผู้รับมอบยอมรับ”</div>
+      </div>
+
+      <div class="card-b">
+
+        <div class="acc-body">
+  <div class="ho-search-panel">
+
+    <div class="field ho-pro-field">
+      <label for="ho_vehicle">🚗 รถ / รายการประจำรถ</label>
+      <select id="ho_vehicle"></select>
+    </div>
+
+    <div class="field ho-pro-field">
+      <label for="ho_checkDate">📅 วันที่ตรวจสอบ</label>
+      <input id="ho_checkDate" type="date">
+    </div>
+
+    <div class="ho-load-box">
+  <button class="btn" id="ho_reloadBtn" type="button">⟳ โหลดรายการ</button>
+</div>
+<div class="ho-load-status">
+  <span class="mini muted" id="ho_autoHint">—</span>
+</div>
+
+  </div>
+
+  <div class="ho-search-tip">
+    คำแนะนำ: เลือกรถหรือรายการประจำรถ และวันที่ตรวจสอบ จากนั้นกด “โหลดรายการ” เพื่อแสดงรายการตรวจสอบเครื่องมือและพัสดุ
+  </div>
+</div>
+
+        <div class="acc" id="ho_acc_items" data-collapsed="0">
+          <div class="acc-head" role="button" tabindex="0">
+            <div class="acc-title">
+              <div class="t">ตรวจรายการเครื่องมือ/พัสดุ</div>
+              <div class="s">มีแถบเลื่อนแนวนอนบนมือถือ เพื่อให้เห็นครบทุกคอลัมน์รวมหมายเหตุ</div>
+            </div>
+            <button class="acc-toggle" type="button">–</button>
+          </div>
+          <div class="acc-body">
+            <div class="tableWrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>รายการ</th>
+                    <th>หน่วย</th>
+                    <th>มาตรฐาน</th>
+                    <th>จำนวนที่มี</th>
+                    <th>จำนวนจริง</th>
+                    <th>ขาดจริง</th>
+                    <th>สถานะ</th>
+                    <th>หมายเหตุ</th>
+                  </tr>
+                </thead>
+                <tbody id="ho_tbody">
+                  <tr><td colspan="9" class="muted">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note-box">
+              * PDF จะออกพร้อมลายเซ็นได้เฉพาะเมื่อผู้รับมอบกดยอมรับแล้วเท่านั้น
+            </div>
+          </div>
+        </div>
+
+        <div class="acc" id="ho_acc_submit" data-collapsed="0">
+          <div class="acc-head" role="button" tabindex="0">
+            <div class="acc-title">
+              <div class="t">ผู้มอบ / ผู้รับมอบ</div>
+              <div class="s">ผู้รับมอบต้องไม่ใช่คนเดียวกับผู้มอบ</div>
+            </div>
+            <button class="acc-toggle" type="button">–</button>
+          </div>
+          <div class="acc-body">
+            <div class="grid2">
+              <div class="field">
+                <label for="ho_giver">ผู้มอบ จากบัญชีที่ล็อกอิน</label>
+                <input id="ho_giver" disabled>
+              </div>
+              <div class="field">
+                <label for="ho_receiver">ผู้รับมอบ</label>
+                <select id="ho_receiver"></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <label for="ho_remark">หมายเหตุรวม</label>
+                <input id="ho_remark" placeholder="เช่น รายการที่ขาด/ชำรุด/ส่งซ่อม...">
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn gold" id="ho_saveActualBtn" type="button" disabled>💾 บันทึกจำนวนจริงลงชีตรถ</button>
+              <button class="btn primary" id="ho_submitBtn" type="button" disabled>📦 บันทึกส่งมอบ รอผู้รับมอบยอมรับ</button>
+              <span class="mini muted" id="ho_missHint">—</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="card">
+      <div class="card-h">
+        <h3>3) ส่งออก PDF รายวัน</h3>
+        <div class="muted mini">รายงานรายวันจะแสดงเฉพาะรายการที่ผู้รับมอบกดยอมรับแล้ว</div>
+      </div>
+      <div class="card-b">
+        <div class="grid2">
+          <div class="field"><label for="ho_dDay">วัน</label><input id="ho_dDay" type="number" min="1" max="31"></div>
+          <div class="field"><label for="ho_dMonth">เดือน</label><input id="ho_dMonth" type="number" min="1" max="12"></div>
+          <div class="field"><label for="ho_dYear">ปี พ.ศ.</label><input id="ho_dYear" type="number"></div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label for="ho_pdfVehicle">รถ</label>
+          <select id="ho_pdfVehicle"></select>
+        </div>
+        <div class="toolbar">
+  <button class="btn primary" id="ho_exportDayBtn" type="button">
+    📄 ส่งออก PDF รายวัน
+  </button>
+</div>
+        <div id="ho_dayList" class="mini muted" style="margin-top:12px">ยังไม่ได้ค้นหารายการ</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (function(){
+    const $ = id => document.getElementById(id);
+
+    const checkDate = $('ho_checkDate');
+    const giver = $('ho_giver');
+    const receiver = $('ho_receiver');
+    const remark = $('ho_remark');
+    const itemScope = { value: 'เครื่องมือและพัสดุ' };
+
+    const vehicleSel = $('ho_vehicle');
+    const pdfVehicleSel = $('ho_pdfVehicle');
+
+    const reloadBtn = $('ho_reloadBtn');
+    const saveActualBtn = $('ho_saveActualBtn');
+    const submitBtn = $('ho_submitBtn');
+
+    const tbody = $('ho_tbody');
+    const missHint = $('ho_missHint');
+    const autoHint = $('ho_autoHint');
+
+    const pendingRefreshBtn = $('ho_pendingRefreshBtn');
+    const pendingList = $('ho_pendingList');
+    const pendingHint = $('ho_pendingHint');
+    const notifyBell = $('ho_notifyBell');
+const notifyBadge = $('ho_notifyBadge');
+
+    const dDay = $('ho_dDay');
+    const dMonth = $('ho_dMonth');
+    const dYear = $('ho_dYear');
+    
+    const exportDayBtn = $('ho_exportDayBtn');
+    const dayList = $('ho_dayList');
+
+
+const dashRefreshBtn = $('ho_dashRefreshBtn');
+const dashGrid = $('ho_dashGrid');
+
+    let token = null;
+    let personName = '';
+    let equipment = [];
+    let __didInitOnce = false;
+    let _autoTimer = null;
+    let _lastLoadKey = '';
+
+    const VEH_PREFIX_SHOW = 'รายการ';
+
+    function norm_(s){
+      return String(s ?? '')
+        .replace(/[\u200B-\u200D\uFEFF]/g,'')
+        .replace(/\u00A0/g,' ')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
+    function personKey_(name){
+      let s = norm_(name);
+      s = s.replace(/^(นาย|นางสาว|นาง|Mr\.?|Mrs\.?|Ms\.?)\s+/i,'').trim();
+      return s.replace(/\s+/g,'').toLowerCase();
+    }
+    function samePerson_(a,b){ return personKey_(a) && personKey_(a) === personKey_(b); }
+    function prettyVehicle_(sheetName){
+      const s = norm_(sheetName);
+      if(!s) return '';
+      if(s.startsWith(VEH_PREFIX_SHOW)){
+        return norm_(s.slice(VEH_PREFIX_SHOW.length)).replace(/^[:：\-–—\s]+/,'').trim() || s;
+      }
+      return s;
+    }
+    function esc(s){
+      return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    }
+    function toISODateLocal(d){
+      const yy=d.getFullYear();
+      const mm=String(d.getMonth()+1).padStart(2,'0');
+      const dd=String(d.getDate()).padStart(2,'0');
+      return `${yy}-${mm}-${dd}`;
+    }
+    function dateThai_(iso){
+      if(!iso) return '—';
+      const d = new Date(iso + 'T12:00:00');
+      if(isNaN(d.getTime())) return iso;
+      return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()+543}`;
+    }
+    function todayParts(){
+      const d=new Date();
+      return {day:d.getDate(), month:d.getMonth()+1, be:d.getFullYear()+543};
+    }
+
+    function showLoading_(msg){
+      if(typeof window.showLoading === 'function') window.showLoading(msg || 'กำลังดำเนินการ…');
+    }
+    function hideLoading_(){
+      if(typeof window.hideLoading === 'function') window.hideLoading();
+    }
+    function showErr_(m){
+      if(typeof window.showErr === 'function') window.showErr(m);
+      else if(window.Swal) Swal.fire({icon:'error', title:'ไม่สำเร็จ', text:String(m||'เกิดข้อผิดพลาด')});
+      else alert(m);
+    }
+    function showOK_(m){
+      if(typeof window.showOK === 'function') window.showOK(m);
+      else if(window.Swal) Swal.fire({icon:'success', title:'สำเร็จ', text:String(m||'ดำเนินการเรียบร้อย'), timer:1400, showConfirmButton:false});
+      else alert(m);
+    }
+    function gsCall_(fn, args){
+      return new Promise((resolve,reject)=>{
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(google.script.run, args||[]);
+      });
+    }
+    function setBtnBusy_(btn, busy, text){
+      if(!btn) return;
+      if(busy){
+        btn.dataset.oldText = btn.textContent || '';
+        btn.dataset.oldDisabled = btn.disabled ? '1' : '0';
+        btn.disabled = true;
+        btn.textContent = text || 'กำลังดำเนินการ…';
+        btn.dataset.busy = '1';
+      }else{
+        if(btn.dataset.busy !== '1') return;
+        btn.textContent = btn.dataset.oldText || btn.textContent;
+        btn.disabled = btn.dataset.oldDisabled === '1';
+        delete btn.dataset.busy;
+        delete btn.dataset.oldText;
+        delete btn.dataset.oldDisabled;
+      }
+    }
+    async function runBusy_(btn, msg, fn){
+      try{
+        setBtnBusy_(btn, true, msg || 'กำลังดำเนินการ…');
+        showLoading_(msg || 'กำลังดำเนินการ…');
+        return await fn();
+      }finally{
+        hideLoading_();
+        setBtnBusy_(btn, false);
+      }
+    }
+
+    function wireAcc_(){
+      document.querySelectorAll('#page-handover .acc').forEach(acc=>{
+        if(acc.dataset.wired === '1') return;
+        acc.dataset.wired = '1';
+        const head = acc.querySelector('.acc-head');
+        const btn = acc.querySelector('.acc-toggle');
+        const set = collapsed=>{
+          acc.setAttribute('data-collapsed', collapsed ? '1' : '0');
+          if(btn) btn.textContent = collapsed ? '+' : '–';
+        };
+        const toggle = ()=>set(acc.getAttribute('data-collapsed') !== '1');
+        if(head){
+          head.addEventListener('click', e=>{
+            if(e.target && e.target.closest && e.target.closest('.acc-toggle')) return;
+            toggle();
+          });
+        }
+        if(btn){
+          btn.addEventListener('click', e=>{
+            e.preventDefault();
+            e.stopPropagation();
+            toggle();
+          });
+        }
+      });
+    }
+
+    function calcMissingQty(it){
+      const have = Number(it.haveQty||0)||0;
+      const act  = Number(it.actualQty||0)||0;
+      return Math.max(0, have - act);
+    }
+    function computeProblemCount_(){
+      let prob=0;
+      equipment.forEach(it=>{
+        const miss = calcMissingQty(it);
+        if(miss>0) prob++;
+      });
+      return prob;
+    }
+    function computeReady_(){
+      const same = receiver.value && samePerson_(receiver.value, personName);
+      const ready = !!token && !!personName && !!vehicleSel.value && !!checkDate.value && !!receiver.value && equipment.length>0 && !same;
+      if(submitBtn.dataset.busy !== '1') submitBtn.disabled = !ready;
+      if(saveActualBtn.dataset.busy !== '1') saveActualBtn.disabled = !(token && vehicleSel.value && equipment.length>0);
+      missHint.textContent = equipment.length
+        ? `รายการไม่ครบ/ขาดจริง: ${computeProblemCount_()} รายการ${same ? ' • ผู้รับมอบซ้ำกับผู้มอบ' : ''}`
+        : '—';
+    }
+
+    function drawTable(){
+      if(!equipment.length){
+        tbody.innerHTML = '<tr><td colspan="9" class="muted">ยังไม่มีข้อมูล กรุณาเลือกรถและโหลดรายการ</td></tr>';
+        computeReady_();
+        return;
+      }
+
+      tbody.innerHTML='';
+      equipment.forEach((it, idx)=>{
+        if(typeof it.note !== 'string') it.note = '';
+        const std  = Number(it.stdQty||0)||0;
+        const have = Number(it.haveQty||0)||0;
+        const act  = Number((it.actualQty ?? have ?? 0))||0;
+        it.actualQty = act;
+
+        const miss = calcMissingQty(it);
+
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${esc(it.seq ?? (idx+1))}</td>
+          <td>${esc(it.name||'')}</td>
+          <td>${esc(it.unit||'')}</td>
+          <td>${std}</td>
+          <td><input value="${have}" disabled></td>
+          <td><input data-i="${idx}" class="actual" type="number" min="0" step="1" value="${act}"></td>
+          <td><span class="diff ${miss>0?'bad':''}">${miss}</span></td>
+          <td><span class="status-pill ${miss>0?'st-rejected':'st-accepted'}">${miss>0?'ไม่ครบ':'ครบ'}</span></td>
+          <td><input data-i="${idx}" class="note" type="text" value="${esc(it.note||'')}" placeholder="เช่น ชำรุด/ส่งซ่อม/ยืมอยู่..."></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll('input.actual').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          const i=Number(inp.getAttribute('data-i'));
+          equipment[i].actualQty = Number(inp.value||0)||0;
+          const miss = calcMissingQty(equipment[i]);
+          const tr = inp.closest('tr');
+          const span = tr.querySelector('span.diff');
+          const pill = tr.querySelector('.status-pill');
+          span.textContent = String(miss);
+          span.className = 'diff ' + (miss>0 ? 'bad':'');
+          pill.textContent = miss>0 ? 'ไม่ครบ' : 'ครบ';
+          pill.className = 'status-pill ' + (miss>0 ? 'st-rejected':'st-accepted');
+          computeReady_();
+        });
+      });
+
+      tbody.querySelectorAll('input.note').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          const i=Number(inp.getAttribute('data-i'));
+          equipment[i].note = inp.value || '';
+        });
+      });
+
+      computeReady_();
+    }
+
+    async function loadVehicles_(){
+      const cars = await gsCall_('hoGetVehicleSheets', [token]);
+      const list = (Array.isArray(cars)?cars:[]).map(norm_).filter(Boolean);
+
+      vehicleSel.innerHTML = '<option value="">— เลือกรถ —</option>';
+      pdfVehicleSel.innerHTML = '<option value="">— เลือกรถ —</option>';
+
+      const lastVeh = (()=>{ try{return localStorage.getItem('handover_vehicle')||'';}catch(e){return '';} })();
+
+      list.forEach(sheetName=>{
+        const text = prettyVehicle_(sheetName);
+        const o1=document.createElement('option');
+        o1.value = sheetName;
+        o1.textContent = text;
+        vehicleSel.appendChild(o1);
+
+        const o2=document.createElement('option');
+        o2.value = sheetName;
+        o2.textContent = text;
+        pdfVehicleSel.appendChild(o2);
+      });
+
+      if(list.length){
+        vehicleSel.value = lastVeh && list.includes(lastVeh) ? lastVeh : list[0];
+        pdfVehicleSel.value = vehicleSel.value;
+      }
+    }
+
+    async function loadEquipment_(){
+      if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+      const vehicleSheet = norm_(vehicleSel.value);
+      if(!vehicleSheet) return showErr_('กรุณาเลือก "รถ" ก่อน');
+      if(!checkDate.value) return showErr_('กรุณาเลือก "วันที่ตรวจสอบ" ก่อน');
+
+      const [emps, eq] = await Promise.all([
+        gsCall_('hoGetEmployeeNames', [token]),
+        gsCall_('hoGetEquipmentList', [token, vehicleSheet])
+      ]);
+
+      receiver.innerHTML = '<option value="">— เลือกผู้รับมอบ —</option>';
+      (Array.isArray(emps)?emps:[]).forEach(n=>{
+        const name = String(n||'').trim();
+        if(!name) return;
+        const o=document.createElement('option');
+        o.value=o.textContent=name;
+        receiver.appendChild(o);
+      });
+
+      equipment = (Array.isArray(eq)?eq:[]).map(x=>({
+        rowIndex: x.rowIndex,
+        seq: x.seq,
+        type: x.type || 'เครื่องมือ/พัสดุ',
+        name: x.name,
+        unit: x.unit,
+        stdQty: x.stdQty,
+        haveQty: x.haveQty,
+        actualQty: x.actualQty,
+        note: ''
+      }));
+
+      drawTable();
+      showOK_('โหลดรายการแล้ว');
+    }
+
+    function canAutoLoad_(){
+      return !!token && !!norm_(vehicleSel.value) && !!String(checkDate.value||'').trim();
+    }
+    function scheduleAutoLoad_(reason){
+      if(!token){
+        autoHint.textContent = 'กรุณาเข้าสู่ระบบก่อน';
+        return;
+      }
+      if(!canAutoLoad_()){
+        autoHint.textContent = 'เลือก “รถ” และ “วันที่ตรวจสอบ” ให้ครบ';
+        return;
+      }
+      const key = [token, norm_(vehicleSel.value), checkDate.value].join('|');
+      if(key === _lastLoadKey) return;
+      if(_autoTimer) clearTimeout(_autoTimer);
+      autoHint.textContent = `กำลังเตรียมโหลด… (${reason||'เปลี่ยนข้อมูล'})`;
+      _autoTimer = setTimeout(async ()=>{
+        _autoTimer = null;
+        if(!canAutoLoad_()) return;
+        _lastLoadKey = [token, norm_(vehicleSel.value), checkDate.value].join('|');
+        await runBusy_(reloadBtn, 'กำลังโหลดรายการ…', loadEquipment_);
+        autoHint.textContent = `โหลดแล้ว • ${prettyVehicle_(vehicleSel.value)} • ${dateThai_(checkDate.value)}`;
+      }, 350);
+    }
+    
+    async function viewPendingDetail_(handoverId){
+  try{
+    showLoading_('กำลังโหลดรายละเอียด…');
+
+    let data = await gsCall_('hoGetHandoverForView', [token, handoverId]);
+
+if(!data){
+  const rows = await gsCall_('hoListPendingReceiver', [token]);
+  data = (Array.isArray(rows) ? rows : []).find(x => String(x.id) === String(handoverId));
+}
+
+if(!data){
+  throw new Error('ไม่พบข้อมูลรายการส่งมอบจาก HandoverLog');
+}
+
+if(!data){
+  throw new Error('ไม่พบข้อมูลรายการส่งมอบจาก HandoverLog');
+}
+
+const items = Array.isArray(data.items) ? data.items : [];
+
+    const rows = items.map((it, i)=>{
+      const have = Number(it.haveQty || 0);
+      const actual = Number(it.actualQty || 0);
+      const miss = Number(it.missingQty ?? Math.max(0, have - actual)) || 0;
+
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td style="text-align:left">${esc(it.name || '-')}</td>
+          <td>${esc(it.unit || '-')}</td>
+          <td>${Number(it.stdQty || 0)}</td>
+          <td>${have}</td>
+          <td>${actual}</td>
+          <td style="font-weight:900;color:${miss > 0 ? '#b91c1c' : '#15803d'}">${miss}</td>
+          <td style="text-align:left">${esc(it.note || '-')}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const html = `
+      <div style="text-align:left;font-size:13px;line-height:1.6;margin-bottom:10px">
+        <b>รถ:</b> ${esc(prettyVehicle_(data.vehicle || ''))}<br>
+        <b>ผู้มอบ:</b> ${esc(data.giver || '-')}<br>
+        <b>ผู้รับมอบ:</b> ${esc(data.receiver || '-')}<br>
+        <b>วันที่:</b> ${esc(String(data.day || '-'))}/${esc(String(data.month || '-'))}/${esc(data.beYear || '-')}<br>
+        <b>รายการทั้งหมด:</b> ${items.length} รายการ
+      </div>
+
+      <div style="max-height:430px;overflow:auto;border:1px solid #eadcff;border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#f6f0ff;color:#3b0764">
+              <th style="padding:8px">ลำดับ</th>
+              <th style="padding:8px;text-align:left">รายการ</th>
+              <th style="padding:8px">หน่วย</th>
+              <th style="padding:8px">มาตรฐาน</th>
+              <th style="padding:8px">จำนวนที่มี</th>
+              <th style="padding:8px">จำนวนจริง</th>
+              <th style="padding:8px">ขาด</th>
+              <th style="padding:8px;text-align:left">หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows || '<tr><td colspan="8" style="padding:12px;text-align:center">ไม่พบรายการ</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    if(window.Swal){
+      Swal.fire({
+  title: 'รายการเครื่องมือ/พัสดุที่ส่งมอบ',
+  width: '980px',
+  html,
+  confirmButtonText: 'ปิด',
+  heightAuto: false,
+  scrollbarPadding: false,
+  didOpen: () => {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  },
+  willClose: () => {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+});
+    }else{
+      alert(`พบรายการ ${items.length} รายการ`);
+    }
+
+  }catch(e){
+    showErr_(e && e.message ? e.message : e);
+  }finally{
+    hideLoading_();
+  }
+}
+
+    async function loadPending_(){
+      if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+      const rows = await gsCall_('hoListPendingReceiver', [token]);
+      const list = Array.isArray(rows) ? rows : [];
+      pendingHint.textContent = `พบ ${list.length} รายการ`;
+      /* update badge */
+if(notifyBadge){
+  if(list.length > 0){
+    notifyBadge.style.display = 'flex';
+    notifyBadge.textContent = list.length > 99 ? '99+' : String(list.length);
+  }else{
+    notifyBadge.style.display = 'none';
+  }
+}
+
+      if(!list.length){
+        pendingList.innerHTML = '<div class="muted mini">ไม่มีรายการรอรับมอบสำหรับคุณ</div>';
+        return;
+      }
+
+      pendingList.innerHTML = '';
+      list.forEach(r=>{
+        const div = document.createElement('div');
+        div.className = 'pending-item';
+        div.innerHTML = `
+          <div class="pending-title">
+            <div>${esc(prettyVehicle_(r.vehicle||''))}</div>
+            <span class="status-pill st-pending">รอรับมอบ</span>
+          </div>
+          <div class="mini muted" style="margin-top:6px">
+            วันที่ ${esc(String(r.day).padStart(2,'0'))}/${esc(String(r.month).padStart(2,'0'))}/${esc(r.beYear)} •
+            ผู้มอบ: <b>${esc(r.giver||'-')}</b> •
+            ประเภท: ${esc(r.itemScope||'-')}<br>
+            รายการทั้งหมด ${Number(r.totalItems||0)} รายการ / ไม่ครบ ${Number(r.missingCount||0)} รายการ
+            ${r.remark ? '<br>หมายเหตุ: '+esc(r.remark) : ''}
+          </div>
+          <div class="toolbar">
+            <button class="btn" data-act="view" data-id="${esc(r.id)}">👁️ ดูรายการ</button>
+<button class="btn primary" data-act="accept" data-id="${esc(r.id)}">✅ ยอมรับ</button>
+<button class="btn danger" data-act="reject" data-id="${esc(r.id)}">❌ ปฏิเสธ</button>
+          </div>
+        `;
+        pendingList.appendChild(div);
+      });
+
+      pendingList.querySelectorAll('button[data-act]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const id = btn.getAttribute('data-id');
+          const act = btn.getAttribute('data-act');
+
+          if(act === 'view'){
+  if(!id) return showErr_('ไม่พบรหัสรายการส่งมอบ');
+  await viewPendingDetail_(id);
+  return;
+}
+
+          let note = '';
+          if(window.Swal){
+            const res = await Swal.fire({
+              icon: act === 'accept' ? 'question' : 'warning',
+              title: act === 'accept' ? 'ยืนยันรับมอบ?' : 'ปฏิเสธรับมอบ?',
+              input: 'text',
+              inputLabel: 'หมายเหตุผู้รับมอบ (ถ้ามี)',
+              inputPlaceholder: 'ระบุหมายเหตุ...',
+              showCancelButton: true,
+              confirmButtonText: act === 'accept' ? 'ยอมรับ' : 'ปฏิเสธ',
+              cancelButtonText: 'ยกเลิก'
+            });
+            if(!res.isConfirmed) return;
+            note = res.value || '';
+          }else{
+            if(!confirm(act === 'accept' ? 'ยืนยันรับมอบ?' : 'ปฏิเสธรับมอบ?')) return;
+          }
+
+          await runBusy_(btn, 'กำลังบันทึกการตอบรับ…', async ()=>{
+            if(act === 'accept') await gsCall_('hoAcceptHandover', [token, id, note]);
+            else await gsCall_('hoRejectHandover', [token, id, note]);
+            showOK_('บันทึกสถานะแล้ว');
+            await loadPending_();
+            await loadDashboard_();
+          });
+        });
+      });
+    }
+
+    async function listDay_(){
+      if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+      const be=Number(dYear.value||0), m=Number(dMonth.value||0), dd=Number(dDay.value||0);
+      const veh = norm_(pdfVehicleSel.value);
+      if(!be||!m||!dd) return showErr_('กรุณาระบุ วัน/เดือน/ปี ให้ครบ');
+      if(!veh) return showErr_('กรุณาเลือก "รถ"');
+
+      const rows = await gsCall_('hoListHandoversByDay', [token, be, m, dd, veh]);
+      const list = Array.isArray(rows)?rows:[];
+      if(!list.length){
+        dayList.innerHTML='ไม่พบรายการในวันนั้น สำหรับรถคันนี้';
+        return;
+      }
+
+      dayList.innerHTML='';
+      list.forEach(r=>{
+        const div=document.createElement('div');
+        div.className = 'pending-item';
+        const cls = r.status === 'ACCEPTED' ? 'st-accepted' : (r.status === 'REJECTED' ? 'st-rejected' : 'st-pending');
+        const statusText = r.status === 'ACCEPTED' ? 'ยอมรับแล้ว' : (r.status === 'REJECTED' ? 'ปฏิเสธ' : 'รอรับมอบ');
+        div.innerHTML = `
+          <div class="pending-title">
+            <div>${esc(r.giver||'-')} → ${esc(r.receiver||'-')}</div>
+            <span class="status-pill ${cls}">${statusText}</span>
+          </div>
+          <div class="mini muted" style="margin-top:6px">
+            รถ: ${esc(prettyVehicle_(r.vehicle||''))} • ประเภท: ${esc(r.itemScope||'-')} • ไม่ครบ ${Number(r.missingCount||0)} รายการ
+          </div>
+          <div class="toolbar">
+            <button class="btn" data-view="${esc(r.id)}">ดูรายละเอียด</button>
+            <button class="btn primary" data-pdf="${esc(r.id)}" ${r.status==='ACCEPTED'?'':'disabled'}>PDF ลงนาม</button>
+          </div>
+        `;
+        dayList.appendChild(div);
+      });
+
+      dayList.querySelectorAll('button[data-pdf]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const id=btn.getAttribute('data-pdf');
+          await runBusy_(btn,'กำลังสร้าง PDF…', async ()=>{
+            const info = await gsCall_('hoExportHandoverPdf', [token, id]);
+            if(info && info.url) window.open(info.url,'_blank');
+            else showErr_('ไม่พบลิงก์ไฟล์ PDF');
+          });
+        });
+      });
+
+      dayList.querySelectorAll('button[data-view]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const id=btn.getAttribute('data-view');
+          const data = await gsCall_('hoGetHandoverForView', [token, id]);
+          const html = `
+            <div style="text-align:left;font-size:13px;line-height:1.5">
+              <b>รถ:</b> ${esc(prettyVehicle_(data.vehicle||''))}<br>
+              <b>ผู้มอบ:</b> ${esc(data.giver||'-')}<br>
+              <b>ผู้รับมอบ:</b> ${esc(data.receiver||'-')}<br>
+              <b>สถานะ:</b> ${esc(data.status||'-')}<br>
+              <b>รายการ:</b> ${(data.items||[]).length} รายการ
+            </div>
+          `;
+          if(window.Swal) Swal.fire({title:'รายละเอียด', html, confirmButtonText:'ปิด'});
+          else alert(html.replace(/<[^>]*>/g,''));
+        });
+      });
+    }
+
+    function initDefaults_(){
+      const d = new Date();
+      checkDate.value = toISODateLocal(d);
+      const t=todayParts();
+      dDay.value=String(t.day);
+      dMonth.value=String(t.month);
+      dYear.value=String(t.be);
+    }
+
+    function wireEvents_(){
+      if(window.__handoverWired) return;
+      window.__handoverWired = true;
+
+      vehicleSel.addEventListener('change', ()=>{
+        try{ localStorage.setItem('handover_vehicle', norm_(vehicleSel.value)); }catch(e){}
+        if(vehicleSel.value) pdfVehicleSel.value = vehicleSel.value;
+        equipment = [];
+        drawTable();
+        _lastLoadKey = '';
+        scheduleAutoLoad_('เลือกรถ');
+      });
+
+      checkDate.addEventListener('change', ()=>{
+        if(checkDate.value){
+          const d = new Date(checkDate.value + 'T12:00:00');
+          dDay.value = String(d.getDate());
+          dMonth.value = String(d.getMonth()+1);
+          dYear.value = String(d.getFullYear()+543);
+        }
+        equipment = [];
+        drawTable();
+        _lastLoadKey = '';
+        scheduleAutoLoad_('เปลี่ยนวันที่');
+      });
+
+      receiver.addEventListener('change', computeReady_);
+
+      reloadBtn.addEventListener('click', async ()=>{
+        _lastLoadKey = '';
+        await runBusy_(reloadBtn, 'กำลังโหลดรายการ…', loadEquipment_);
+      });
+
+      saveActualBtn.addEventListener('click', async ()=>{
+        if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+        const vehicleSheet = norm_(vehicleSel.value);
+        if(!vehicleSheet) return showErr_('กรุณาเลือก "รถ"');
+        if(!equipment.length) return showErr_('ยังไม่มีรายการ');
+
+        await runBusy_(saveActualBtn,'กำลังบันทึกจำนวนจริง…', async ()=>{
+          const updates = equipment.map(it=>({rowIndex:it.rowIndex, actualQty:it.actualQty}));
+          const res = await gsCall_('hoSaveActualQtys', [token, vehicleSheet, updates]);
+          showOK_(`บันทึกแล้ว ${res && res.updated ? res.updated : 0} รายการ`);
+        });
+      });
+
+      submitBtn.addEventListener('click', async ()=>{
+        token = window.__token || token;
+        personName = window.__personName || personName;
+        const vehicleSheet = norm_(vehicleSel.value);
+        if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+        if(!personName) return showErr_('บัญชีนี้ยังไม่ผูก PersonName ใน Users');
+        if(!vehicleSheet) return showErr_('กรุณาเลือก "รถ"');
+        if(!checkDate.value) return showErr_('กรุณาเลือกวันที่ตรวจสอบ');
+        if(!receiver.value) return showErr_('กรุณาเลือกผู้รับมอบ');
+        if(samePerson_(receiver.value, personName)) return showErr_('ผู้รับมอบต้องไม่ใช่คนเดียวกับผู้มอบ');
+        if(!equipment.length) return showErr_('ยังไม่มีรายการ');
+
+        const prob = computeProblemCount_();
+        if(window.Swal){
+          const r = await Swal.fire({
+            icon: prob ? 'warning' : 'question',
+            title: 'ยืนยันบันทึกส่งมอบ?',
+            text: `พบรายการไม่ครบ ${prob} รายการ ระบบจะส่งให้ผู้รับมอบกดยอมรับก่อนออก PDF`,
+            showCancelButton:true,
+            confirmButtonText:'บันทึกส่งมอบ',
+            cancelButtonText:'ยกเลิก'
+          });
+          if(!r.isConfirmed) return;
+        }else if(!confirm('ยืนยันบันทึกส่งมอบ?')){
+          return;
+        }
+
+        const payload = {
+          checkDateISO: checkDate.value,
+          receiverName: receiver.value,
+          vehicleSheet,
+          itemScope: itemScope.value || 'เครื่องมือและพัสดุ',
+          remark: remark.value || '',
+          items: equipment.map(it=>({
+            seq: it.seq,
+            type: itemScope.value || 'เครื่องมือและพัสดุ',
+            name: it.name,
+            unit: it.unit,
+            stdQty: it.stdQty,
+            haveQty: it.haveQty,
+            actualQty: it.actualQty,
+            note: it.note || ''
+          }))
+        };
+
+        await runBusy_(submitBtn,'กำลังบันทึกส่งมอบ…', async ()=>{
+          const res = await gsCall_('hoSubmitHandover', [token, payload]);
+          showOK_(`บันทึกแล้ว สถานะ: รอผู้รับมอบยอมรับ`);
+          await loadPending_();
+          await loadDashboard_();
+        });
+      });
+
+      pendingRefreshBtn.addEventListener('click', async ()=>{
+        await runBusy_(pendingRefreshBtn, 'กำลังโหลดรายการรอยอมรับ…', loadPending_);
+      });
+
+     
+
+      exportDayBtn.addEventListener('click', async ()=>{
+        if(!token) return showErr_('กรุณาเข้าสู่ระบบก่อน');
+        const be=Number(dYear.value||0), m=Number(dMonth.value||0), dd=Number(dDay.value||0);
+        const veh = norm_(pdfVehicleSel.value);
+        if(!be||!m||!dd) return showErr_('กรุณาระบุ วัน/เดือน/ปี ให้ครบ');
+        if(!veh) return showErr_('กรุณาเลือก "รถ"');
+
+        await runBusy_(exportDayBtn,'กำลังสร้าง PDF รายวัน…', async ()=>{
+          const info = await gsCall_('hoExportDailyHandoverPdfByVehicle', [token, be, m, dd, veh]);
+          if(info && info.url) window.open(info.url,'_blank');
+          else showErr_('ไม่พบลิงก์ไฟล์ PDF');
+        });
+      });
+      if(notifyBell){
+  notifyBell.addEventListener('click', ()=>{
+    const el = document.querySelector('#ho_pendingList');
+    if(el){
+      el.scrollIntoView({
+        behavior:'smooth',
+        block:'start'
+      });
+    }
+  });
+}
+    }
+
+    async function doShow_(){
+      token = window.__token || null;
+      personName = window.__personName || '';
+      giver.value = personName || '(ยังไม่ผูก PersonName ใน Users)';
+
+      initDefaults_();
+      wireAcc_();
+      wireEvents_();
+
+      if(!token){
+        equipment=[]; drawTable();
+        pendingList.innerHTML = '<div class="muted mini">กรุณาเข้าสู่ระบบก่อน</div>';
+        return;
+      }
+
+      await loadVehicles_();
+equipment=[]; 
+drawTable();
+scheduleAutoLoad_('เปิดหน้า');
+
+// โหลดรายการรอรับมอบอัตโนมัติเมื่อเข้าหน้า
+pendingHint.textContent = 'กำลังโหลดรายการรอยอมรับ…';
+await loadPending_();
+await loadDashboard_();
+    }
+
+    window.handoverPage = window.handoverPage || {};
+    window.handoverPage.onShow = async function(){
+      __didInitOnce = true;
+      await doShow_();
+    };
+
+    setTimeout(()=>{ if(!__didInitOnce) window.handoverPage.onShow(); }, 150);
+      async function loadDashboard_(){
+      if(!token || !dashGrid) return;
+
+      dashGrid.innerHTML = '<div class="muted mini">กำลังโหลด Dashboard...</div>';
+
+      try{
+        const data = await gsCall_('hoGetDashboardSummary', [token]);
+        const vehicles = Array.isArray(data && data.vehicles) ? data.vehicles : [];
+
+        if(!vehicles.length){
+          dashGrid.innerHTML = '<div class="muted mini">ยังไม่มีข้อมูลรับมอบที่ยอมรับแล้ว</div>';
+          return;
+        }
+
+        dashGrid.innerHTML = '';
+
+        vehicles.forEach(v=>{
+          const pct = Number(v.percent || 0);
+          const pctClass = pct >= 95 ? '' : (pct >= 80 ? 'warn' : 'bad');
+          const miss = Array.isArray(v.topMissing) ? v.topMissing : [];
+
+          const missHtml = miss.length
+            ? `
+              <div class="ho-missing-list">
+                ${miss.map((x,i)=>`
+                  <div class="ho-missing-row">
+                    <span>${i+1}. ${esc(x.name || '-')}</span>
+                    <strong>ขาด ${Number(x.missingQty||0)} ${esc(x.unit||'')}</strong>
+                  </div>
+                `).join('')}
+              </div>
+            `
+            : `<div class="ho-complete">✅ ไม่พบรายการขาดในการรับมอบล่าสุด</div>`;
+
+          const div = document.createElement('div');
+          div.className = 'ho-dash-item';
+
+          div.innerHTML = `
+            <div class="ho-dash-title">
+              <div>
+                🚗 ${esc(v.vehicleDisplay || v.vehicle || '-')}
+                <div class="muted mini">ล่าสุด: ${dateThai_(v.checkDateISO)}</div>
+              </div>
+              <span class="status-pill ${pct >= 95 ? 'st-accepted' : (pct >= 80 ? 'st-pending' : 'st-rejected')}">
+                ${pct >= 95 ? 'พร้อมใช้' : (pct >= 80 ? 'ควรตรวจสอบ' : 'ไม่พร้อม')}
+              </span>
+            </div>
+
+            <div class="ho-percent ${pctClass}">${pct}%</div>
+
+            <div class="ho-bar">
+              <span style="width:${Math.max(0, Math.min(100, pct))}%"></span>
+            </div>
+
+            <div class="mini muted">
+              ครบ ${Number(v.totalActual||0)} / มาตรฐาน ${Number(v.totalStd||0)}
+              ${Number(v.totalMissing||0) > 0 ? ` • ขาดรวม ${Number(v.totalMissing||0)}` : ''}
+            </div>
+
+            ${missHtml}
+          `;
+
+          dashGrid.appendChild(div);
+        });
+
+      }catch(err){
+        dashGrid.innerHTML = `<div class="muted mini">โหลด Dashboard ไม่สำเร็จ: ${esc(err.message || err)}</div>`;
+      }
+    }
+
+    if(dashRefreshBtn){
+      dashRefreshBtn.addEventListener('click', async ()=>{
+        await runBusy_(dashRefreshBtn, 'กำลังโหลด Dashboard…', loadDashboard_);
+      });
+    }
+
+    window.handoverPage = window.handoverPage || {};
+    window.handoverPage.onShow = async function(){
+      __didInitOnce = true;
+      await doShow_();
+    };
+
+    setTimeout(()=>{
+      if(!__didInitOnce) window.handoverPage.onShow();
+    }, 150);
+
+  })();
+  </script>
+</section>
