@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>PEA Phrasaeng Standby</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6b1fa7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css?v=outage-popup-overflow-fix-1" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <!-- Login -->
+  <div id="loginWrap" class="login-overlay">
+    <div class="login-card">
+      <h2>เข้าสู่ระบบ</h2>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><label>ผู้ใช้</label><input id="u" placeholder="เช่น PEA" autocomplete="username"></div>
+        <div><label>รหัสผ่าน</label><input id="p" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"></div>
+      </div>
+      <div id="loginError" class="error" style="display:none"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+        <button id="loginBtn" type="button" class="btn primary">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+      <button id="sidebarToggle" class="hambtn" type="button" title="ซ่อน/แสดงเมนู">
+                <span class="icon">☰</span>
+                <span class="t">เมนู</span>
+              </button>
+
+      <div class="sidebar-brand">
+        <span class="brand-title">ตารางเวร Standby</span>
+        <small>ปี 2569 • PEA พระแสง</small>
+      </div>
+
+      <div class="user-block">
+        <div class="user-avatar">PEA</div>
+        <div class="user-info-main">
+          <div class="user-name" id="sidebarPersonName">ยังไม่ได้เข้าสู่ระบบ</div>
+          <div class="user-meta" id="sidebarUsername">—</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="side-link active" data-page="calendar"><span class="icon">📅</span><span class="label">ปฏิทิน &amp; สรุปชั่วโมง</span></button>
+        <button class="side-link" data-page="attendance"><span class="icon">✅</span><span class="label">ลงชื่อปฏิบัติงาน</span></button>
+        <button class="side-link" data-page="swap"><span class="icon">🔁</span><span class="label">ขอสับเปลี่ยนเวร</span></button>
+        <button class="side-link" data-page="admin"><span class="icon">🛠</span><span class="label">เมนูผู้ดูแล</span></button>
+        <button class="side-link" data-page="rules"><span class="icon">⚙️</span><span class="label">ตั้งค่าเงื่อนไข</span></button>
+        <button class="side-link" data-page="handover"><span class="icon">🧰</span><span class="label">ส่งมอบ/รับมอบ</span></button>
+        
+        <button class="side-link" type="button" data-page="map">
+        <span class="icon">🗺️</span>
+        <span class="label">แผนที่สถิติไฟฟ้าขัดข้อง</span>
+        </button>
+
+      </nav>
+
+      <div class="side-footer">
+        * แสดงชื่อผู้ใช้งานจากบัญชีใน <strong>เมนูผู้ดูแลระบบ</strong> และชื่อใน <strong>ตั้งค่าเงื่อนไข</strong>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="app-main">
+      <header class="topbar app-header">
+        <div class="container brandbar">
+          <div class="brand-left">
+            <div class="brand-title-row">
+              <h1>ตารางเวร Standby ปี 2569</h1>
+            </div>
+            <span id="rolePill" class="role-pill">ระดับ : ผู้ใช้งานทั่วไป</span>
+            <div class="user-inline">เข้าสู่ระบบโดย: <span id="userInlineName">-</span></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-desktop">
+              <div class="toolbar-group toolbar-account">
+                <button class="btn" id="switchBtn" type="button">เข้าสู่ระบบ / สลับบัญชี</button>
+                <button class="btn" id="logoutBtn" type="button" style="display:none">ออกจากระบบ</button>
+              </div>
+
+              <div class="toolbar-group toolbar-data">
+                <button class="btn" id="refreshBtn" type="button">รีเฟรชข้อมูล</button>
+              </div>
+
+              <div class="toolbar-group toolbar-month">
+                <button class="btn" id="prevBtn" type="button">← เดือนก่อน</button>
+                <select id="monthSelect" title="เลือกเดือน"></select>
+                <button class="btn" id="nextBtn" type="button">เดือนถัดไป →</button>
+              </div>
+
+              <div class="toolbar-group toolbar-view">
+                <!-- ✅ Mobile: toggle view (Grid/List) -->
+                <button class="btn" id="viewBtn" type="button" title="สลับมุมมองปฏิทิน">มุมมอง: อัตโนมัติ</button>
+              </div>
+
+              <div class="toolbar-group toolbar-actions">
+                <button class="btn primary" id="genBtn" type="button" style="display:none">จัดตารางเวร (เดือนนี้)</button>
+                <button class="btn" id="pdfBtn" type="button">ส่งออกตารางเวรฯ PDF</button>
+                <button class="btn" id="swapSumPdfBtn" type="button" style="display:none">สรุปสับเปลี่ยนเวร PDF (เดือนนี้)</button>
+                <button class="btn" id="createBtn" type="button">สร้างปฏิทิน</button>
+                <button class="btn" id="phonePdfBtn" type="button">เบอร์โทรศัพท์</button>
+              </div>
+            </div>
+
+            <div class="toolbar-mobile" aria-label="Mobile toolbar">
+              <button class="mobile-menu-toggle" type="button" title="เมนู">☰</button>
+              <div class="mobile-month-control"></div>
+              <button class="mobile-actions-toggle" type="button" aria-expanded="false" aria-controls="mobileActionsPanel">การทำงาน</button>
+            </div>
+
+            <div class="mobile-actions-panel" id="mobileActionsPanel" hidden></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="container">
+          <!-- PAGE 1 -->
+          <section id="page-calendar" class="page active">
+            <section class="card">
+              <div class="panel" style="padding-bottom:0">
+                <div id="title" class="panel-title">ปฏิทิน</div>
+              </div>
+              <div id="missingHint" class="panel" style="display:none">
+                <div class="muted">ยังไม่มีปฏิทิน • หากคุณเป็น Editor ให้กด “สร้างปฏิทิน” เพื่อเริ่มต้น</div>
+              </div>
+
+              <!-- ✅ calendar container supports grid OR list -->
+              <div class="cal-scroll" id="calScroll">
+                <div id="calendarWrap"></div>
+              </div>
+
+              <div class="panel" style="border-top:1px solid var(--line)">
+                <div class="muted" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+                  <strong style="color:#7a35b8">หมายเหตุ</strong>
+                  <span class="chip chip-s1">S1</span> 00:30–08:30
+                  <span class="chip chip-s2">S2</span> 08:30–16:30 <em>(ลงสีเฉพาะวันหยุด)</em>
+                  <span class="chip chip-s3">S3</span> 16:30–00:30
+                  <span class="chip chip-s1">R</span> สำรอง กะ1 (สร้างเมื่อเลือก “มีเวรสำรอง” ในการตั้งค่า)
+                  <span>-</span> <span style="font-weight:bold;color:#1d4ed8;">หัวหน้าเวร</span>
+                </div>
+              </div>
+            </section>
+
+            <div class="collapse-card" id="summaryCard">
+              <button type="button" class="collapse-head">
+                <span>สรุปชั่วโมงเวร (เดือนนี้)</span>
+                <span class="collapse-arrow">▾</span>
+              </button>
+              <div class="collapse-body panel">
+                <div id="summaryTableWrap" style="width:100%">—</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PAGE 2 -->
+          <section id="page-attendance" class="page">
+            <div class="collapse-card" id="attCard">
+              <button type="button" class="collapse-head">
+                <span>ลงชื่อปฏิบัติงาน (บันทึกเวลา + พิกัด + ภาพใบหน้า)</span>
+                <span class="collapse-arrow">▾</span>
+              </button>
+
+              <div class="collapse-body panel" style="gap:16px;flex-wrap:wrap">
+                <div style="flex:1;min-width:320px">
+                  <div class="panel-title">ข้อมูลกะและผู้ปฏิบัติงาน</div>
+                  <p class="muted">เวลาในระบบ (อุปกรณ์ของคุณ): <strong id="nowClock">—</strong></p>
+
+                  <div class="form-row-inline">
+                    <div class="form-row">
+                      <label>วันที่ (ของเดือนที่เลือก)</label>
+                      <input type="number" id="attDay" min="1" max="31" style="max-width:140px">
+                    </div>
+
+                    <div class="form-row">
+                      <label>กะ</label>
+                      <select id="attShift" style="max-width:220px">
+                        <option value="1">กะที่ 1 (00:30 - 08:30)</option>
+                        <option value="2">กะที่ 2 (08:30 - 16:30)</option>
+                        <option value="3">กะที่ 3 (16:30 - 00:30)</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <label>ประเภทการลงชื่อ</label>
+                      <select id="attAction" class="att-action">
+                        <option value="IN">ลงชื่อเข้างาน (IN)</option>
+                        <option value="OUT">ลงชื่อออกงาน (OUT)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <select id="attPerson" style="display:none;"></select>
+
+                  <p class="hint">
+                    ผู้ปฏิบัติงาน: <strong id="attPersonLabel">ใช้จากบัญชีที่เข้าสู่ระบบ</strong><br>
+                    • ลงชื่อเข้า: ลงได้ล่วงหน้าไม่เกิน 30 นาที ก่อนเวลาเริ่มกะ<br>
+                    • ลงชื่อออก: ลงหลังเวลาเลิกกะได้ไม่เกิน 30 นาที (เกินจะไม่อนุญาต)
+                  </p>
+                </div>
+
+                <div style="flex:1;min-width:320px">
+                  
+                  <div class="panel-title">กล้อง &amp; ตำแหน่ง</div>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+               <button class="btn btn-camera-border-run" id="camStartBtn" type="button">
+               <span>เปิดกล้อง ถ่ายภาพยืนยันตัวตน</span>
+
+               <i class="line top"></i>
+              <i class="line left"></i>
+              <i class="line bottom"></i>
+               <i class="line right"></i>
+                  </button>
+
+             <button class="btn" id="camSnapBtn" type="button"
+             style="display:none;width:100%;padding:16px;font-size:18px">
+              ถ่ายภาพ
+           </button>
+      </div>
+<video id="camVideo" autoplay playsinline muted></video>
+                  <img id="camPreview" alt="ภาพตัวอย่างหลังถ่าย" />
+                  
+                  <div class="panel-title">ตำแหน่ง</div>
+
+                  <p id="attGeo" class="hint" style="margin-top:8px">
+                    ตำแหน่ง: ยังไม่ระบุ (จะขอสิทธิเมื่อกดบันทึก)
+                  </p>
+
+                  <button class="btn primary" id="attSubmit" type="button">บันทึกการลงชื่อปฏิบัติงาน</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TOOL: Export ใบลงชื่อ 1 วัน -->
+            <div class="card" style="margin-top:12px;padding:12px;border:1px dashed var(--line);border-radius:12px;background:var(--panel2)">
+              <div style="font-weight:700;margin-bottom:6px">ส่งออกใบลงชื่ออยู่เวร (1 วัน)</div>
+              <div class="muted" style="font-size:12px;margin-bottom:10px">
+                เลือกวันที่ แล้วกดส่งออก ระบบจะสร้าง PDF ใบลงชื่อ 3 กะ ของวันนั้นจากข้อมูลในชีต Attendance
+              </div>
+
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+                <div class="form-row" style="margin:0">
+                  <label>วันที่</label>
+                  <input type="number" id="expDay" min="1" max="31" style="width:120px">
+                </div>
+
+                <button class="btn" id="expDailyBtn" type="button">ส่งออกใบลงชื่อ (PDF)</button>
+              </div>
+
+              <div id="expDailyResult" class="hint" style="margin-top:10px;display:none"></div>
+            </div>
+          </section>
+ 
+          <!-- page_handover.html (REPLACE WHOLE FILE) -->
+<section id="page-handover" class="page">
+<div class="ho-hero">
+
+  <button id="ho_notifyBell" class="ho-notify-bell" type="button" title="รายการรอรับมอบ">
+    🔔
+    <span id="ho_notifyBadge" class="ho-notify-badge" style="display:none">0</span>
+  </button>
+    <h2>ส่งมอบ / รับมอบ เครื่องมือและพัสดุประจำรถ</h2>
+    <p>ผู้มอบบันทึกรายการก่อน จากนั้นผู้รับมอบต้องกดยอมรับในระบบ จึงจะสามารถออก PDF พร้อมลงนามทั้งสองฝ่ายได้</p>
+  </div>
+
+
+
+  <div class="ho-dashboard-card">
+  <div class="ho-dash-head">
+    <div>
+      <h3>Dashboard ความพร้อมเครื่องมือ/พัสดุประจำรถ</h3>
+      <div class="muted mini">อ้างอิงจากรายการส่งมอบ/รับมอบที่ผู้รับมอบยอมรับล่าสุดของแต่ละรถ</div>
+    </div>
+    <button class="btn" id="ho_dashRefreshBtn" type="button">🔄 รีเฟรช Dashboard</button>
+  </div>
+
+  <div id="ho_dashGrid" class="ho-dash-grid">
+    <div class="muted mini">กำลังโหลด Dashboard...</div>
+  </div>
+</div>
+
+  <div class="ho-grid">
+
+
+        <div class="card">
+      <div class="card-h">
+        <h3>1) รายการรอฉันรับมอบ</h3>
+        <div class="muted mini">รายการที่ระบุชื่อคุณเป็นผู้รับมอบ จะแสดงที่นี่เพื่อกดยอมรับหรือปฏิเสธ</div>
+      </div>
+      <div class="card-b">
+        <div class="toolbar" style="margin-top:0">
+          <button class="btn" id="ho_pendingRefreshBtn" type="button">🔄 โหลดรายการรอยอมรับ</button>
+          <span class="mini muted" id="ho_pendingHint">—</span>
+        </div>
+        <div id="ho_pendingList" class="pending-list" style="margin-top:12px">
+          <div class="muted mini">ยังไม่ได้โหลดรายการ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h3>2) บันทึกส่งมอบเครื่องมือ/พัสดุ</h3>
+        <div class="muted mini">เลือกรถ วันที่ และตรวจรายการ จากนั้นบันทึกเป็นสถานะ “รอผู้รับมอบยอมรับ”</div>
+      </div>
+
+      <div class="card-b">
+
+        <div class="acc-body">
+  <div class="ho-search-panel">
+
+    <div class="field ho-pro-field">
+      <label for="ho_vehicle">🚗 รถ / รายการประจำรถ</label>
+      <select id="ho_vehicle"></select>
+    </div>
+
+    <div class="field ho-pro-field">
+      <label for="ho_checkDate">📅 วันที่ตรวจสอบ</label>
+      <input id="ho_checkDate" type="date">
+    </div>
+
+    <div class="ho-load-box">
+  <button class="btn" id="ho_reloadBtn" type="button">⟳ โหลดรายการ</button>
+</div>
+<div class="ho-load-status">
+  <span class="mini muted" id="ho_autoHint">—</span>
+</div>
+
+  </div>
+
+  <div class="ho-search-tip">
+    คำแนะนำ: เลือกรถหรือรายการประจำรถ และวันที่ตรวจสอบ จากนั้นกด “โหลดรายการ” เพื่อแสดงรายการตรวจสอบเครื่องมือและพัสดุ
+  </div>
+</div>
+
+        <div class="acc" id="ho_acc_items" data-collapsed="0">
+          <div class="acc-head" role="button" tabindex="0">
+            <div class="acc-title">
+              <div class="t">ตรวจรายการเครื่องมือ/พัสดุ</div>
+              <div class="s">มีแถบเลื่อนแนวนอนบนมือถือ เพื่อให้เห็นครบทุกคอลัมน์รวมหมายเหตุ</div>
+            </div>
+            <button class="acc-toggle" type="button">–</button>
+          </div>
+          <div class="acc-body">
+            <div class="tableWrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>รายการ</th>
+                    <th>หน่วย</th>
+                    <th>มาตรฐาน</th>
+                    <th>จำนวนที่มี</th>
+                    <th>จำนวนจริง</th>
+                    <th>ขาดจริง</th>
+                    <th>สถานะ</th>
+                    <th>หมายเหตุ</th>
+                  </tr>
+                </thead>
+                <tbody id="ho_tbody">
+                  <tr><td colspan="9" class="muted">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note-box">
+              * PDF จะออกพร้อมลายเซ็นได้เฉพาะเมื่อผู้รับมอบกดยอมรับแล้วเท่านั้น
+            </div>
+          </div>
+        </div>
+
+        <div class="acc" id="ho_acc_submit" data-collapsed="0">
+          <div class="acc-head" role="button" tabindex="0">
+            <div class="acc-title">
+              <div class="t">ผู้มอบ / ผู้รับมอบ</div>
+              <div class="s">ผู้รับมอบต้องไม่ใช่คนเดียวกับผู้มอบ</div>
+            </div>
+            <button class="acc-toggle" type="button">–</button>
+          </div>
+          <div class="acc-body">
+            <div class="grid2">
+              <div class="field">
+                <label for="ho_giver">ผู้มอบ จากบัญชีที่ล็อกอิน</label>
+                <input id="ho_giver" disabled>
+              </div>
+              <div class="field">
+                <label for="ho_receiver">ผู้รับมอบ</label>
+                <select id="ho_receiver"></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <label for="ho_remark">หมายเหตุรวม</label>
+                <input id="ho_remark" placeholder="เช่น รายการที่ขาด/ชำรุด/ส่งซ่อม...">
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn gold" id="ho_saveActualBtn" type="button" disabled>💾 บันทึกจำนวนจริงลงชีตรถ</button>
+              <button class="btn primary" id="ho_submitBtn" type="button" disabled>📦 บันทึกส่งมอบ รอผู้รับมอบยอมรับ</button>
+              <span class="mini muted" id="ho_missHint">—</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="card">
+      <div class="card-h">
+        <h3>3) ส่งออก PDF รายวัน</h3>
+        <div class="muted mini">รายงานรายวันจะแสดงเฉพาะรายการที่ผู้รับมอบกดยอมรับแล้ว</div>
+      </div>
+      <div class="card-b">
+        <div class="grid2">
+          <div class="field"><label for="ho_dDay">วัน</label><input id="ho_dDay" type="number" min="1" max="31"></div>
+          <div class="field"><label for="ho_dMonth">เดือน</label><input id="ho_dMonth" type="number" min="1" max="12"></div>
+          <div class="field"><label for="ho_dYear">ปี พ.ศ.</label><input id="ho_dYear" type="number"></div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label for="ho_pdfVehicle">รถ</label>
+          <select id="ho_pdfVehicle"></select>
+        </div>
+        <div class="toolbar">
+  <button class="btn primary" id="ho_exportDayBtn" type="button">
+    📄 ส่งออก PDF รายวัน
+  </button>
+</div>
+        <div id="ho_dayList" class="mini muted" style="margin-top:12px">ยังไม่ได้ค้นหารายการ</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+          <section id="page-map" class="page">
+  <div class="card" style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div>
+        <div class="panel-title" style="font-size:18px;">🗺️ แผนที่เหตุการณ์ไฟฟ้าขัดข้อง</div>
+        <div class="hint">ดึงข้อมูลจาก Attendance → OutageJson → เทียบพิกัดจากชีต Device</div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select id="mapMonth">
+          <option value="0">ทั้งปี</option>
+          <option value="1">มกราคม</option>
+          <option value="2">กุมภาพันธ์</option>
+          <option value="3">มีนาคม</option>
+          <option value="4">เมษายน</option>
+          <option value="5">พฤษภาคม</option>
+          <option value="6">มิถุนายน</option>
+          <option value="7">กรกฎาคม</option>
+          <option value="8">สิงหาคม</option>
+          <option value="9">กันยายน</option>
+          <option value="10">ตุลาคม</option>
+          <option value="11">พฤศจิกายน</option>
+          <option value="12">ธันวาคม</option>
+        </select>
+        <button id="mapLoadBtn" class="btn primary" type="button">โหลดแผนที่</button>
+      </div>
+    </div>
+
+    <div class="map-stat-grid">
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapTotalEvents">0</div>
+        <div class="map-stat-label">รายการไฟฟ้าขัดข้อง</div>
+      </div>
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapTotalPoints">0</div>
+        <div class="map-stat-label">จุดที่พบพิกัด</div>
+      </div>
+      <div class="map-stat-card emergency-card">
+        <div class="map-stat-num" id="mapEmergencyCount">0</div>
+        <div class="map-stat-label">จุดฉุกเฉินซ้ำใน 7 วัน</div>
+      </div>
+      <div class="map-stat-card">
+        <div class="map-stat-num" id="mapUnmatched">0</div>
+        <div class="map-stat-label">รหัสที่ไม่พบใน Device</div>
+      </div>
+    </div>
+
+    <div id="mapEmergencyBox" class="map-emergency-box" style="display:none;"></div>
+
+    <div id="outageMap"></div>
+
+    <div class="collapse-card">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>🚨 จุดฉุกเฉินซ้ำในรอบ 7 วัน</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div class="table-scroll">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th>อันดับ</th>
+                <th>รหัสอุปกรณ์</th>
+                <th>สถานที่</th>
+                <th>7 วัน</th>
+                <th>สาเหตุ</th>
+                <th>ครั้งล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody id="mapEmergencyTbody">
+              <tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapse-card">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>🔥 จุดเกิดเหตุบ่อยที่สุด 10 อันดับแรก</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div class="table-scroll">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th>อันดับ</th>
+                <th>รหัสอุปกรณ์</th>
+                <th>สถานที่</th>
+                <th>จำนวนครั้ง</th>
+                <th>นาทีรวม</th>
+                <th>ครั้งล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody id="mapTopTbody">
+              <tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapse-card collapsed">
+      <button class="collapse-head" type="button" onclick="mapToggleCollapse_(this, event)">
+        <span>⚠️ รหัสที่อ่านได้จาก OutageJson แต่ไม่พบในชีต Device</span>
+        <span class="collapse-arrow">▾</span>
+      </button>
+      <div class="collapse-body" style="padding:12px;">
+        <div id="mapUnmatchedList" class="hint">-</div>
+      </div>
+    </div>
+  </div>
+</section>
+          <!-- PAGE 3 -->
+          <section id="page-swap" class="page">
+            <div class="collapse-card" id="viewerCard">
+              <button type="button" class="collapse-head">
+                <span>ขอสับเปลี่ยน / ให้ผู้อื่นอยู่เวรแทน (เดือนนี้)</span>
+                <span class="collapse-arrow">▾</span>
+              </button>
+
+              <div class="collapse-body panel" id="viewerPanel" style="gap:16px">
+                <!-- A) ส่งคำขอ -->
+                <fieldset style="flex:1;border:1px dashed var(--line);border-radius:12px">
+                  <legend>ส่งคำขอ</legend>
+
+                  <div class="note-box" style="margin:10px 10px 6px 10px">
+                    <div style="font-weight:800;color:#5a2a90;margin-bottom:4px">ขั้นตอนการทำงาน</div>
+                    <div class="small-note">
+                      1) ผู้ร้องขอส่งคำขอ → ระบบบันทึกเป็น <b>รอผู้แทนยอมรับ</b><br>
+                      2) ผู้แทนเข้ามากด <b>ยอมรับ</b> → คำขอจะเปลี่ยนเป็น <b>await_inspector</b> และส่งไปให้ ผู้ตรวจสอบ ตรวจสอบคำขอ<br>
+                      3) ผู้ตรวจสอบ <b>ผ่าน</b> → คำขอจะเปลี่ยนเป็น <b>pending</b> และส่งไปให้ ผู้มีอำนาจ อนุมัติ<br>
+                      4) ผู้มีอำนาจ อนุมัติ/ปฏิเสธ → ระบบปรับตารางเวรและสถานะตามเดิม
+
+                    </div>
+                  </div>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 10px 10px 10px">
+                    <label>วัน <input type="number" id="rqDay" min="1" max="31" style="width:100px"></label>
+                    <label>กะ
+                      <select id="rqShift">
+                        <option value="1">กะ1</option><option value="2">กะ2</option><option value="3">กะ3</option>
+                      </select>
+                    </label>
+                    <label>ผู้ร้องขอ <select id="rqRequester" style="min-width:160px"></select></label>
+                    <label>ผู้แทน <select id="rqCoverer" style="min-width:160px"></select></label>
+
+                    <textarea id="rqReason" placeholder="กรุณาระบุเหตุผล" rows="1"
+                      style="min-width:260px; outline:none;"></textarea>
+                    <button class="btn primary" id="rqSubmit" type="button" disabled>ส่งคำขอ</button>
+                  </div>
+
+                  <div class="hint" style="padding:0 10px 12px 10px">
+                    * หลังส่งคำขอ ระบบจะรอให้ “ผู้แทน” มากด <b>ยอมรับ</b> และผู้ตรวจสอบ ตรวจผ่านก่อน จึงจะขึ้นให้ ผู้มีอำนาจ อนุมัติ
+                  </div>
+                </fieldset>
+
+                <!-- B) กล่องคำขอที่รอฉันยอมรับ (ผู้แทน) -->
+                <fieldset style="flex:1;min-width:420px;border:1px dashed var(--line);border-radius:12px">
+                  <legend>คำขอที่รอยอมรับ</legend>
+                  <div style="display:flex;gap:8px;align-items:center;margin:8px 10px;flex-wrap:wrap">
+                    <button class="btn" id="inboxRefresh" type="button">รีเฟรชรายการ</button>
+                    <span class="hint" id="inboxWhoHint">—</span>
+                    <span class="hint" id="inboxScopeHint" style="margin-left:auto">ค้นหา: ทั้งปี</span>
+                  </div>
+                  <div id="inboxList" class="muted" style="padding:0 10px 12px 10px">—</div>
+                </fieldset>
+
+                <!-- C) ประวัติคำขอของฉัน (ผู้ร้องขอ) -->
+                <fieldset style="flex:1;min-width:420px;border:1px dashed var(--line);border-radius:12px">
+                  <legend>ประวัติคำขอ (เดือนนี้)</legend>
+                  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:0 10px">
+                    <label>ดูของ <select id="historyFor"></select></label>
+                    <button class="btn" id="historyRefresh" type="button">รีเฟรชประวัติ</button>
+                  </div>
+                  <div id="historyList" class="muted" style="padding:0 10px 12px 10px">—</div>
+                </fieldset>
+              </div>
+            </div>
+          </section>
+
+          <!-- PAGE 4 -->
+          <!-- PAGE 4 -->
+<section id="page-admin" class="page">
+
+  <!-- การ์ดที่ 1 : ตรวจสอบคำขอ / วันหยุด / รายงาน -->
+<div class="collapse-card" id="editorCard">
+  <button type="button" class="collapse-head">
+    <span>เมนูตรวจสอบ / ผู้ดูแลระบบ</span>
+    <span class="collapse-arrow">▾</span>
+  </button>
+
+  <div class="collapse-body panel" id="editorPanel" style="gap:16px">
+
+    <fieldset id="inspectorBox" style="min-width:420px;flex:1;border:1px dashed var(--line);border-radius:12px;display:none">
+      <legend>คำขอรอตรวจสอบ (Inspector)</legend>
+
+      <div class="hint" style="padding:10px 10px 0 10px">
+        * รายการนี้จะแสดงเฉพาะสถานะ <b>await_inspector</b>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin:8px 10px;flex-wrap:wrap">
+        <button class="btn" id="inspectRefreshBtn" type="button">รีเฟรชรายการ</button>
+        <span class="hint">สำหรับผู้ตรวจสอบก่อนส่งต่อให้ Editor</span>
+      </div>
+
+      <div id="inspectList" class="muted" style="padding:0 10px 12px 10px">—</div>
+    </fieldset>
+
+    <fieldset id="editorPendingBox" style="min-width:420px;flex:1;border:1px dashed var(--line);border-radius:12px">
+      <legend>คำขอรออนุมัติ (Editor)</legend>
+      <div class="hint" style="padding:10px 10px 0 10px">
+        * รายการนี้จะแสดงเฉพาะสถานะ <b>pending</b> (ผ่านการตรวจสอบจาก Inspector แล้ว)
+      </div>
+      <div id="pendingList" class="muted" style="padding:0 10px 12px 10px">—</div>
+    </fieldset>
+
+    <fieldset style="min-width:320px;flex:1;border:1px dashed var(--line);border-radius:12px">
+      <legend>กำหนด/ยกเลิกวันหยุด (เดือนนี้)</legend>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px">
+        <label>วัน <input type="number" id="holDay" min="1" max="31" style="width:100px"></label>
+        <button class="btn primary" id="setHolidayBtn" type="button">ตั้งเป็นวันหยุด</button>
+        <button class="btn" id="unsetHolidayBtn" type="button">ยกเลิกวันหยุด</button>
+      </div>
+    </fieldset>
+
+    <fieldset style="min-width:320px;flex:1;border:1px dashed var(--line);border-radius:12px">
+      <legend>รายงานสับเปลี่ยนเวร (เดือนนี้)</legend>
+      <div class="muted" style="margin-bottom:8px;padding:0 10px">
+        สรุป “คำขอสับเปลี่ยนทั้งหมด” ของเดือนที่เลือก แล้วส่งออกเป็น PDF
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 10px 12px 10px">
+        <button class="btn" id="swapSumPdfBtn2" type="button">สรุปสับเปลี่ยนเวร PDF (เดือนนี้)</button>
+        <span id="swapSumPdfLinkWrap" class="muted"></span>
+      </div>
+    </fieldset>
+
+  </div>
+</div>
+  <!-- การ์ดที่ 2 : จัดการผู้ใช้งานระบบ -->
+  <div class="collapse-card" id="adminUsersCard">
+    <button type="button" class="collapse-head">
+      <span>จัดการผู้ใช้งานระบบ</span>
+      <span class="collapse-arrow">▾</span>
+    </button>
+
+    <div class="collapse-body panel" style="gap:16px">
+      <fieldset style="min-width:420px;flex:1 1 100%;border:1px dashed var(--line);border-radius:12px">
+        <legend>ข้อมูลผู้ใช้</legend>
+
+        <div class="grid" style="padding:10px">
+          <div class="form-row">
+            <label>Username</label>
+            <input type="text" id="adminUserUsername" placeholder="เช่น 506026">
+          </div>
+
+          <div class="form-row">
+            <label>Password</label>
+            <input type="text" id="adminUserPassword" placeholder="รหัสผ่าน">
+          </div>
+
+          <div class="form-row">
+            <label>Role</label>
+            <select id="adminUserRole">
+              <option value="viewer">viewer</option>
+              <option value="editor">editor</option>
+              <option value="inspector">inspector</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>Person Name</label>
+            <input type="text" id="adminUserPersonName" placeholder="ชื่อ-สกุล">
+          </div>
+
+          <div class="form-row">
+            <label>Active</label>
+            <select id="adminUserActive">
+              <option value="TRUE">TRUE</option>
+              <option value="FALSE">FALSE</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 10px 10px 10px">
+          <button class="btn primary" id="adminUserSaveBtn" type="button">เพิ่มผู้ใช้</button>
+          <button class="btn" id="adminUserClearBtn" type="button">ล้างฟอร์ม</button>
+        </div>
+
+        <div class="note-box" style="margin:0 10px 10px 10px">
+          <div class="small-note">
+            - viewer = ผู้ใช้งานทั่วไป<br>
+            - inspector = ผู้ตรวจสอบ<br>
+            - editor = ผู้ดูแลระบบ<br>
+            - Active = FALSE จะไม่สามารถใช้งานบัญชีได้
+          </div>
+        </div>
+
+        <div class="table-scroll" style="padding:0 10px 10px 10px">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th style="width:60px">ลำดับ</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Role</th>
+                <th>Person Name</th>
+                <th>Active</th>
+                <th style="width:180px">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody">
+              <tr>
+                <td colspan="7" class="muted">กำลังโหลดข้อมูล...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+
+</section>
+   
+   <!-- PAGE 5 -->
+<section id="page-rules" class="page">
+
+  <!-- กล่องใหม่: จัดการรายชื่อเวร -->
+  <div class="collapse-card" id="peopleCard">
+    <button type="button" class="collapse-head">
+      <span>จัดการรายชื่อผู้ปฏิบัติงาน / หน้าที่ปฏิบัติ (Editor)</span>
+      <span class="collapse-arrow">▾</span>
+    </button>
+
+    <div class="collapse-body panel">
+      <div style="width:100%">
+        <div class="grid" style="width:100%; margin-bottom:12px">
+          <div class="form-row">
+            <label>ชื่อ - สกุล</label>
+            <input type="text" id="personNameInput" placeholder="เช่น นายทดสอบ ตัวอย่าง">
+          </div>
+
+          <div class="form-row">
+            <label>หน้าที่ปฏิบัติ</label>
+            <select id="personRoleInput">
+              <option value="">ได้ทั้งหัวหน้า/ลูกเวร</option>
+              <option value="หัวหน้า">หัวหน้า</option>
+              <option value="ลูกเวร">ลูกเวร</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn primary" id="addPersonBtn" type="button">เพิ่มรายชื่อ</button>
+          <button class="btn" id="clearPersonFormBtn" type="button">ล้างฟอร์ม</button>
+        </div>
+
+        <div class="note-box" style="margin-bottom:12px">
+          <div class="small-note">
+            หมายเหตุ:
+            <br>- หัวหน้า = ใช้เป็นหัวหน้าเวรได้
+            <br>- ลูกเวร = เป็นลูกเวรเท่านั้น
+            <br>- ได้ทั้งสอง = ใช้ได้ทั้งสองหน้าที่ปฏิบัติ
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="slim">
+            <thead>
+              <tr>
+                <th style="width:60px">ลำดับ</th>
+                <th>ชื่อ</th>
+                <th style="width:160px">หน้าที่ปฏิบัติ</th>
+                <th style="width:220px">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="peopleTableBody">
+              <tr>
+                <td colspan="4" class="muted">กำลังโหลดข้อมูล...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--การ์ดที่ 2-->
+  
+<div class="collapse-card" id="rulesCard">
+  <button type="button" class="collapse-head">
+    <span>ตั้งค่าเงื่อนไขการจัดเวร (Editor)</span>
+    <span class="collapse-arrow">▾</span>
+  </button>
+
+  <div class="collapse-body panel">
+    <div class="rules-grid">
+
+  <!-- วันปกติ -->
+  <section class="rules-section weekday">
+    <div class="rules-section-head">
+      <span>วันปกติ</span>
+      <span class="sub"> • ตั้งค่ากะประจำวันทำการ</span>
+    </div>
+    <div class="rules-section-body">
+
+      <div class="form-row">
+        <label>วันปกติ - กะ 1 อยู่เวรกี่คน</label>
+        <select id="rule_weekday_s1Count">
+          <option value="0">0 คน</option>
+          <option value="1">1 คน</option>
+          <option value="2" selected>2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - กะ 2 อยู่เวรกี่คน</label>
+        <select id="rule_weekday_s2Count">
+          <option value="0">0 คน</option>
+          <option value="1" selected>1 คน</option>
+          <option value="2">2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+        <div class="hint">กะ 2 วันปกติ โดยปกติไม่คิดค่าตอบแทน</div>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - กะ 3 อยู่เวรกี่คน</label>
+        <select id="rule_weekday_s3Count">
+          <option value="0">0 คน</option>
+          <option value="1">1 คน</option>
+          <option value="2" selected>2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - กะ 2 นำมาหมุนในการจัดเวรหรือไม่</label>
+        <select id="rule_weekday_s2IncludeInRotation">
+          <option value="true" selected>ใช่</option>
+          <option value="false">ไม่ใช่</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - กะ 2 ใช้รายชื่อคงที่ (ทับการหมุนปกติ)</label>
+        <select id="rule_weekday_s2FixedOverride">
+          <option value="false" selected>ไม่ใช้</option>
+          <option value="true">ใช้</option>
+        </select>
+        <div class="hint">
+          ถ้าเลือก “ใช้” ระบบจะไม่ใช้การหมุนสำหรับกะ 2 วันปกติ
+          แต่จะใช้รายชื่อที่กำหนดไว้ทุกวัน และไม่นำมาคิดชั่วโมง
+        </div>
+      </div>
+
+      <div class="form-row" id="weekdayS2FixedNamesWrap">
+        <label>วันปกติ - รายชื่อคงที่ของกะ 2</label>
+        <div id="rule_weekday_s2FixedNames" class="note-box"></div>
+        <div class="hint">เลือกได้หลายชื่อ รายชื่อชุดนี้จะถูกใช้ทุกวันปกติในกะ 2</div>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - มีกะสำรองหรือไม่</label>
+        <select id="rule_weekday_hasReserve">
+          <option value="false" selected>ไม่มี</option>
+          <option value="true">มี</option>
+        </select>
+        <div class="hint">ถ้าเลือก “มี” ระบบค่อยไปดึงคนจากกะถัดไปตามกติกาที่กำหนด</div>
+      </div>
+
+      <div class="form-row">
+        <label>วันปกติ - ถ้ามีกะสำรอง ให้เอาจากกะใด</label>
+        <select id="rule_weekday_reserveFrom">
+          <option value="">(ไม่กำหนด)</option>
+          <option value="S2">กะ 2</option>
+          <option value="S3" selected>กะ 3</option>
+        </select>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- วันหยุด -->
+  <section class="rules-section holiday">
+    <div class="rules-section-head">
+      <span>วันหยุด</span>
+      <span class="sub"> • ตั้งค่ากะวันหยุดและวันนักขัตฤกษ์</span>
+    </div>
+    <div class="rules-section-body">
+
+      <div class="form-row">
+        <label>วันหยุด - กะ 1 อยู่เวรกี่คน</label>
+        <select id="rule_holiday_s1Count">
+          <option value="0">0 คน</option>
+          <option value="1">1 คน</option>
+          <option value="2" selected>2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันหยุด - กะ 2 อยู่เวรกี่คน</label>
+        <select id="rule_holiday_s2Count">
+          <option value="0">0 คน</option>
+          <option value="1">1 คน</option>
+          <option value="2" selected>2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันหยุด - กะ 3 อยู่เวรกี่คน</label>
+        <select id="rule_holiday_s3Count">
+          <option value="0">0 คน</option>
+          <option value="1">1 คน</option>
+          <option value="2" selected>2 คน</option>
+          <option value="3">3 คน</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันหยุด - มีกะสำรองหรือไม่</label>
+        <select id="rule_holiday_hasReserve">
+          <option value="false" selected>ไม่มี</option>
+          <option value="true">มี</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>วันหยุด - ถ้ามีกะสำรอง ให้เอาจากกะใด</label>
+        <select id="rule_holiday_reserveFrom">
+          <option value="">(ไม่กำหนด)</option>
+          <option value="S2" selected>กะ 2</option>
+          <option value="S3">กะ 3</option>
+        </select>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- อื่น ๆ -->
+  <section class="rules-section misc">
+    <div class="rules-section-head">
+      <span>อื่น ๆ / ตั้งค่าเพิ่มเติม</span>
+      <span class="sub">ลำดับเริ่มหมุน • ชั่วโมง • วิธีคิดค่าตอบแทน</span>
+    </div>
+    <div class="rules-section-body">
+
+      <div class="form-row">
+        <label>ลำดับเริ่มหมุน</label>
+        <select id="rule_startSequenceMode">
+          <option value="auto_from_prev" selected>ต่อเนื่องจากเดือนก่อน (อัตโนมัติ)</option>
+          <option value="manual">กำหนดเอง</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>ถ้า manual: เริ่มจับจากชื่อ</label>
+        <select id="rule_manualStartName"></select>
+        <div class="hint">ถ้าไม่เลือก ให้เริ่มจากคนแรกตามลำดับ</div>
+      </div>
+
+      <div class="form-row">
+        <label>จัดลำดับหัวหน้าขึ้นก่อน</label>
+        <select id="rule_preferLeader">
+          <option value="true" selected>ใช่</option>
+          <option value="false">ไม่ใช่</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>ชั่วโมงต่อกะ</label>
+        <input type="number" id="rule_shiftHours" min="1" step="1" value="8">
+      </div>
+
+      <div class="form-row">
+        <label>คิดชั่วโมง S2 วันปกติ</label>
+        <select id="rule_countS2WeekdayHours">
+          <option value="false" selected>ไม่คิด</option>
+          <option value="true">คิด</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>คิดชั่วโมง R</label>
+        <select id="rule_countReserveHours">
+          <option value="false" selected>ไม่คิด</option>
+          <option value="true">คิด</option>
+        </select>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<div class="rules-actions">
+  <button class="btn primary" id="saveRulesBtn" type="button">บันทึกการตั้งค่า</button>
+  <button class="btn" id="saveRulesAndGenBtn" type="button">บันทึก + จัดตาราง (เดือนนี้)</button>
+</div>
+  </div>
+</div>
+
+
+</section>
+
+</div>
+</main>
+</div>
+</div>
+
+<div id="loading" class="loading-overlay hidden">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div id="loadingMsg" class="loading-msg">กำลังประมวลผล…</div>
+  </div>
+</div>
+  <script src="js/config.js?v=standby-api-router-4"></script>
+  <script src="js/api.js?v=standby-api-router-4"></script>
+  <script src="js/utils.js?v=standby-api-router-4"></script>
+  <script src="js/standby.js?v=standby-api-router-4"></script>
+  <script src="js/ui.js?v=standby-api-router-4"></script>
+  <script src="js/app.js?v=standby-swap-selects-fix-2"></script>
+</body>
+</html>
