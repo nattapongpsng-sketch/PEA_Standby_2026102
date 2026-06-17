@@ -315,7 +315,10 @@
       return await callApiFunction_(functionName, args);
     }catch(err){
       const msg = err && err.message ? err.message : String(err);
-      if(msg.indexOf("Unknown action: callFunction") !== -1){
+      if(
+        msg.indexOf("Unknown action: callFunction") !== -1 ||
+        msg.indexOf("Function is not allowed:") !== -1
+      ){
         const direct = await callKnownFunction_(functionName, args);
         if(direct !== undefined) return direct;
         throw new Error("Backend ยังไม่รองรับ callFunction สำหรับ " + functionName);
