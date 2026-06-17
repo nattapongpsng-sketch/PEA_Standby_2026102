@@ -220,6 +220,30 @@ pea-standby-web/
 
 ถ้า `health` ยังไม่มี `supportsCallFunction: true` แปลว่า Web App URL ยังชี้ไป deployment เก่า หรือ Apps Script ยังไม่ได้ deploy version ใหม่
 
+## Phase 1: ครอบระบบเดิมด้วย Next.js
+
+Phase 1 นี้เป็นการครอบระบบ PEA Prasaeng Standby Web เดิมด้วย Next.js App Router เพื่อให้สามารถรันผ่าน `npm run dev`, `npm run build` และ `npm run start` ได้ โดยยังรักษาโครงสร้าง DOM, selector, flow การทำงาน และ business logic เดิมไว้ให้มากที่สุด
+
+- ระบบเดิมยังใช้ HTML/CSS/JS logic เดิม โดยย้ายไฟล์ static ไปให้ Next.js ให้บริการผ่าน `public/`
+- Google Apps Script ยังเป็น Backend สำหรับอ่านและบันทึกข้อมูล
+- Google Sheet ยังเป็น Database เดิมของระบบ
+- Next.js ทำหน้าที่เป็น Web Application Wrapper ก่อนเท่านั้น
+- ยังไม่มี API Route
+- ยังไม่มี PostgreSQL
+- ยังไม่มีการย้าย Business Logic ออกจากไฟล์ JS เดิมหรือ Google Apps Script
+
+```text
+Browser
+  ↓
+Next.js App บน Local/Railway
+  ↓
+Static JS เดิม
+  ↓
+Google Apps Script
+  ↓
+Google Sheet
+```
+
 ## TODO
 
 - ตรวจทานข้อความภาษาไทยหลังเปิดไฟล์ใน editor ที่รองรับ UTF-8
