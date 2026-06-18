@@ -160,6 +160,74 @@ const clearPersonFormBtn = $('#clearPersonFormBtn');
         actions: document.querySelector('.toolbar-actions')
       };
 
+      const headerButtonMeta = {
+        switchBtn: { full: 'เข้าสู่ระบบ', short: 'เข้าสู่ระบบ', icon: '🔐', title: 'เข้าสู่ระบบ' },
+        logoutBtn: { full: 'ออกจากระบบ', short: 'ออกจากระบบ', icon: '🚪', title: 'ออกจากระบบ' },
+        refreshBtn: { full: 'รีเฟรช', short: 'รีเฟรช', icon: '🔄', title: 'รีเฟรช' },
+        prevBtn: { full: 'ก่อนหน้า', short: 'ก่อน', icon: '', title: 'ก่อนหน้า' },
+        nextBtn: { full: 'ถัดไป', short: 'ถัดไป', icon: '', title: 'ถัดไป' },
+        viewBtn: { full: 'อัตโนมัติ', short: 'อัตโนมัติ', icon: '⚙️', title: 'มุมมอง: อัตโนมัติ' },
+        genBtn: { full: 'จัดเวร', short: 'จัดเวร', icon: '🗓️', title: 'จัดเวร' },
+        pdfBtn: { full: 'PDF', short: 'PDF', icon: '📄', title: 'PDF' },
+        swapSumPdfBtn: { full: 'สรุป PDF', short: 'สรุป PDF', icon: '📑', title: 'สรุป PDF' },
+        createBtn: { full: 'ปฏิทิน', short: 'ปฏิทิน', icon: '📅', title: 'ปฏิทิน' },
+        phonePdfBtn: { full: 'โทรศัพท์', short: 'โทรศัพท์', icon: '📞', title: 'โทรศัพท์' }
+      };
+
+      function getButtonIcon(id){
+        return (headerButtonMeta[id] && headerButtonMeta[id].icon) || '';
+      }
+      window.getButtonIcon = getButtonIcon;
+
+      function getHeaderNavMode_(){
+        if(window.matchMedia('(max-width: 767px)').matches) return 'short';
+        if(window.matchMedia('(max-width: 1200px)').matches) return 'short';
+        return 'full';
+      }
+
+      function getHeaderButtonLabel_(id, mode){
+        const meta = headerButtonMeta[id];
+        if(!meta) return '';
+        if(mode === 'icon') return meta.short || meta.full || getButtonIcon(id);
+        if(mode === 'short') return meta.short || meta.full || getButtonIcon(id);
+        return meta.full || meta.short || getButtonIcon(id);
+      }
+
+      function setupHeaderNavigationTooltips_(){
+        Object.keys(headerButtonMeta).forEach(id => {
+          const el = document.getElementById(id);
+          const meta = headerButtonMeta[id];
+          if(!el || !meta) return;
+          const title = meta.title || meta.full || meta.short || '';
+          el.setAttribute('title', title);
+          el.dataset.headerNavButton = '1';
+        });
+        if(mobileMenuToggle){
+          mobileMenuToggle.setAttribute('title', 'เมนู');
+          mobileMenuToggle.textContent = 'เมนู';
+        }
+        if(mobileActionsToggle){
+          mobileActionsToggle.setAttribute('title', 'การทำงาน');
+          mobileActionsToggle.textContent = 'การทำงาน';
+        }
+        if(monthSelect){
+          monthSelect.setAttribute('title', 'เลือกเดือน');
+        }
+      }
+
+      function updateHeaderNavigationMode_(){
+        const mode = getHeaderNavMode_();
+        Object.keys(headerButtonMeta).forEach(id => {
+          const el = document.getElementById(id);
+          if(!el) return;
+          const label = getHeaderButtonLabel_(id, mode);
+          if(label) el.textContent = label;
+          const title = headerButtonMeta[id].title || headerButtonMeta[id].full || label;
+          el.setAttribute('title', title);
+          el.dataset.headerNavMode = mode;
+        });
+      }
+
       const adminUserUsername = $('#adminUserUsername');
 const adminUserPassword = $('#adminUserPassword');
 const adminUserRole = $('#adminUserRole');
@@ -248,6 +316,15 @@ window.__cameraImage = window.__cameraImage || null;
         const ev = effectiveCalendarView_();
         const label = (calendarView === 'auto') ? 'มุมมอง: อัตโนมัติ' : ('มุมมอง: ' + (ev==='list' ? 'รายการ' : 'ตาราง'));
         viewBtn.textContent = label;
+      }
+      function updateViewBtnLabel_(){
+        if(!viewBtn) return;
+        const ev = effectiveCalendarView_();
+        const viewName = (calendarView === 'auto') ? 'อัตโนมัติ' : (ev === 'list' ? 'รายการ' : 'ตาราง');
+        headerButtonMeta.viewBtn.full = viewName;
+        headerButtonMeta.viewBtn.short = viewName;
+        headerButtonMeta.viewBtn.title = 'มุมมอง: ' + viewName;
+        updateHeaderNavigationMode_();
       }
       function cycleCalendarView_(){
         const next = (calendarView === 'auto') ? 'list' : (calendarView === 'list' ? 'grid' : 'auto');
@@ -403,6 +480,8 @@ window.__cameraImage = window.__cameraImage || null;
         closeMobileActionsPanel();
       });
       syncCompactHeader();
+      setupHeaderNavigationTooltips_();
+      updateViewBtnLabel_();
 
       window.addEventListener('resize', ()=>{
         if(!isMobile()) openMobileSidebar(false);
