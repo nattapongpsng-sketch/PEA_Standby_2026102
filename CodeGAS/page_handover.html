@@ -685,7 +685,67 @@ body.swal2-height-auto{
   #page-handover .ho-dash-head{ flex-direction:column; align-items:stretch; }
 }
 
-  </style>
+  
+/* Delivery detail popup: constrain the title only. */
+.delivery-detail-modal .swal2-title,
+.delivery-detail-modal-title{
+  display:none !important;
+}
+
+.delivery-detail-modal .swal2-html-container{
+  margin-top:0 !important;
+  overflow:visible !important;
+  max-height:none !important;
+}
+
+.delivery-detail-content-title{
+  font-size:clamp(18px, 4vw, 32px) !important;
+  line-height:1.2 !important;
+  text-align:center !important;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  max-width:100%;
+  margin:0 auto 12px auto;
+  white-space:normal;
+  color:#5a2a90;
+  font-weight:900;
+}
+
+@media (max-width:768px){
+  .delivery-detail-content-title{
+    font-size:22px !important;
+    line-height:1.1 !important;
+  }
+
+  .delivery-detail-modal{
+    width:calc(100vw - 32px) !important;
+    max-width:calc(100vw - 32px) !important;
+    max-height:calc(100dvh - 96px) !important;
+    padding:14px 14px 12px !important;
+    overflow:hidden !important;
+  }
+
+  .delivery-detail-modal .swal2-html-container{
+    max-height:calc(100dvh - 190px) !important;
+    overflow:auto !important;
+    padding:0 2px 2px !important;
+  }
+
+  .delivery-detail-summary{
+    margin-top:2px !important;
+    margin-bottom:10px !important;
+    line-height:1.45 !important;
+    overflow:visible !important;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+  }
+
+  .delivery-detail-table-wrap{
+    max-height:calc(100dvh - 360px) !important;
+    min-height:220px;
+  }
+}
+</style>
 
   <div class="ho-hero">
 
@@ -1240,7 +1300,8 @@ const items = Array.isArray(data.items) ? data.items : [];
     }).join('');
 
     const html = `
-      <div style="text-align:left;font-size:13px;line-height:1.6;margin-bottom:10px">
+      <div class="delivery-detail-content-title">พัสดุที่ส่งมอบ</div>
+      <div class="delivery-detail-summary" style="text-align:left;font-size:13px;line-height:1.6;margin-bottom:10px">
         <b>รถ:</b> ${esc(prettyVehicle_(data.vehicle || ''))}<br>
         <b>ผู้มอบ:</b> ${esc(data.giver || '-')}<br>
         <b>ผู้รับมอบ:</b> ${esc(data.receiver || '-')}<br>
@@ -1248,7 +1309,7 @@ const items = Array.isArray(data.items) ? data.items : [];
         <b>รายการทั้งหมด:</b> ${items.length} รายการ
       </div>
 
-      <div style="max-height:430px;overflow:auto;border:1px solid #eadcff;border-radius:14px">
+      <div class="delivery-detail-table-wrap" style="max-height:430px;overflow:auto;border:1px solid #eadcff;border-radius:14px">
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead>
             <tr style="background:#f6f0ff;color:#3b0764">
@@ -1271,10 +1332,14 @@ const items = Array.isArray(data.items) ? data.items : [];
 
     if(window.Swal){
       Swal.fire({
-  title: 'รายการเครื่องมือ/พัสดุที่ส่งมอบ',
+  title: '',
   width: '980px',
   html,
   confirmButtonText: 'ปิด',
+  customClass: {
+    popup: 'delivery-detail-modal',
+    title: 'delivery-detail-modal-title'
+  },
   heightAuto: false,
   scrollbarPadding: false,
   didOpen: () => {

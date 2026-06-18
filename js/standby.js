@@ -373,7 +373,8 @@ const items = Array.isArray(data.items) ? data.items : [];
     }).join('');
 
     const html = `
-      <div style="text-align:left;font-size:13px;line-height:1.6;margin-bottom:10px">
+      <div class="delivery-detail-content-title">พัสดุที่ส่งมอบ</div>
+      <div class="delivery-detail-summary" style="text-align:left;font-size:13px;line-height:1.6;margin-bottom:10px">
         <b>รถ:</b> ${esc(prettyVehicle_(data.vehicle || ''))}<br>
         <b>ผู้มอบ:</b> ${esc(data.giver || '-')}<br>
         <b>ผู้รับมอบ:</b> ${esc(data.receiver || '-')}<br>
@@ -381,7 +382,7 @@ const items = Array.isArray(data.items) ? data.items : [];
         <b>รายการทั้งหมด:</b> ${items.length} รายการ
       </div>
 
-      <div style="max-height:430px;overflow:auto;border:1px solid #eadcff;border-radius:14px">
+      <div class="delivery-detail-table-wrap" style="max-height:430px;overflow:auto;border:1px solid #eadcff;border-radius:14px">
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead>
             <tr style="background:#f6f0ff;color:#3b0764">
@@ -404,10 +405,14 @@ const items = Array.isArray(data.items) ? data.items : [];
 
     if(window.Swal){
       Swal.fire({
-  title: 'รายการเครื่องมือ/พัสดุที่ส่งมอบ',
+  title: '',
   width: '980px',
   html,
   confirmButtonText: 'ปิด',
+  customClass: {
+    popup: 'delivery-detail-modal',
+    title: 'delivery-detail-modal-title'
+  },
   heightAuto: false,
   scrollbarPadding: false,
   didOpen: () => {
