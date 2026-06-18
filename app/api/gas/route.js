@@ -1,12 +1,12 @@
 export async function POST(request) {
   try {
+    const body = await request.text();
     const gasApiUrl = process.env.GAS_API_URL;
 
     if (!gasApiUrl) {
       throw new Error("Missing GAS_API_URL environment variable");
     }
 
-    const body = await request.text();
     const gasResponse = await fetch(gasApiUrl, {
       method: "POST",
       headers: {
