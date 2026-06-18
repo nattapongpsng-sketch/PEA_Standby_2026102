@@ -1,4 +1,4 @@
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyqpSG58qsBZDEkit6P-QvZcw5ZX4mze3zFojnBJcEGAIJMcTiTDMs9cDoOZHNskBoI/exec";
+const GAS_API_URL = "/api/gas";
 
 const API_ACTIONS = Object.freeze({
   CALL_FUNCTION: "callFunction",
