@@ -3558,8 +3558,8 @@ legend{
   .toolbar-desktop #switchBtn::before{content:"เข้าสู่ระบบ";}
   .toolbar-desktop #logoutBtn::before{content:"ออกจากระบบ";}
   .toolbar-desktop #refreshBtn::before{content:"รีเฟรช";}
-  .toolbar-desktop #prevBtn::before{content:"← ก่อน";}
-  .toolbar-desktop #nextBtn::before{content:"ถัดไป →";}
+  .toolbar-desktop #prevBtn::before{content:"ก่อน";}
+  .toolbar-desktop #nextBtn::before{content:"ถัดไป";}
   .toolbar-desktop #viewBtn::before{content:"อัตโนมัติ";}
   .toolbar-desktop #genBtn::before{content:"จัดเวร";}
   .toolbar-desktop #pdfBtn::before{content:"PDF";}
@@ -3687,26 +3687,20 @@ legend{
 
   .mobile-month-control #prevBtn,
   .mobile-month-control #nextBtn{
-    width:36px;
-    min-width:36px;
+    width:auto;
+    min-width:52px;
     height:40px;
     min-height:40px;
-    padding:0;
-    font-size:0;
+    padding:0 10px;
+    font-size:12px;
     border-radius:13px;
     color:var(--pea-purple);
   }
 
-  .mobile-month-control #prevBtn::before{
-    content:"←";
-    font-size:18px;
-    line-height:1;
-  }
-
+  .mobile-month-control #prevBtn::before,
   .mobile-month-control #nextBtn::before{
-    content:"→";
-    font-size:18px;
-    line-height:1;
+    content:none;
+    display:none;
   }
 
   .mobile-month-control #monthSelect{
@@ -3738,6 +3732,10 @@ legend{
     box-shadow:0 24px 60px rgba(31,19,48,.24);
   }
 
+  .mobile-actions-panel[hidden]{
+    display:none !important;
+  }
+
   .mobile-actions-panel:not([hidden]){
     display:grid;
     grid-template-columns:1fr;
@@ -3754,6 +3752,8 @@ legend{
   }
 
   .mobile-actions-panel .toolbar-account,
+  .mobile-actions-panel .toolbar-data,
+  .mobile-actions-panel .toolbar-view,
   .mobile-actions-panel .toolbar-actions{
     grid-template-columns:1fr;
   }
@@ -3782,6 +3782,393 @@ legend{
 
   .page{
     margin-top:10px;
+  }
+}
+
+/* =========================
+   Spacious distributed header
+   Layout-only override for the existing topbar controls.
+========================= */
+
+.topbar.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  min-height:auto;
+}
+
+.app-header .brandbar{
+  width:100%;
+  max-width:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px clamp(14px, 2.2vw, 28px);
+}
+
+.app-header .toolbar{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+}
+
+.toolbar-desktop{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:clamp(10px, 1.2vw, 18px);
+  flex-wrap:wrap;
+}
+
+.toolbar-group{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-width:0;
+  padding:4px;
+  border-radius:16px;
+}
+
+.toolbar-account,
+.toolbar-data,
+.toolbar-month,
+.toolbar-view{
+  flex:0 1 auto;
+}
+
+.toolbar-actions{
+  flex:1 1 420px;
+  justify-content:flex-end;
+}
+
+.toolbar-actions .btn{
+  flex:0 1 auto;
+}
+
+.app-header .btn,
+.app-header select,
+.mobile-menu-toggle,
+.mobile-actions-toggle{
+  min-height:44px;
+  height:44px;
+  padding:10px 18px;
+  border-radius:12px !important;
+  font-size:1.4em;
+  line-height:1.15;
+  white-space:nowrap;
+  max-width:none;
+}
+
+.app-header #monthSelect{
+  min-width:150px;
+  max-width:190px;
+  min-height:44px;
+  height:44px;
+  padding:9px 16px;
+  border-radius:10px !important;
+  font-size:1.4em;
+}
+
+@media (min-width:1025px){
+  .topbar.app-header{
+    max-height:none;
+  }
+
+  .app-header .brandbar{
+    display:block;
+    padding:12px clamp(16px, 2.4vw, 32px);
+  }
+
+  .app-header .brand-left{
+    display:none;
+  }
+
+  .toolbar-desktop{
+    flex-wrap:nowrap;
+    overflow:visible;
+  }
+
+  .toolbar-group{
+    gap:10px;
+    padding:4px;
+  }
+
+  .toolbar-actions{
+    flex:1 1 auto;
+  }
+
+  .toolbar-desktop .btn{
+    font-size:0 !important;
+  }
+
+  .toolbar-desktop .btn::before{
+    display:inline;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:15px;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .toolbar-desktop #switchBtn::before{content:"เข้าสู่ระบบ";}
+  .toolbar-desktop #logoutBtn::before{content:"ออกจากระบบ";}
+  .toolbar-desktop #refreshBtn::before{content:"รีเฟรช";}
+  .toolbar-desktop #prevBtn::before{content:"ก่อน";}
+  .toolbar-desktop #nextBtn::before{content:"ถัดไป";}
+  .toolbar-desktop #viewBtn::before{content:"อัตโนมัติ";}
+  .toolbar-desktop #genBtn::before{content:"จัดเวร";}
+  .toolbar-desktop #pdfBtn::before{content:"PDF";}
+  .toolbar-desktop #swapSumPdfBtn::before{content:"สรุป PDF";}
+  .toolbar-desktop #createBtn::before{content:"ปฏิทิน";}
+  .toolbar-desktop #phonePdfBtn::before{content:"โทรศัพท์";}
+
+  .app-header .btn,
+  .app-header select{
+    min-height:44px;
+    height:44px;
+    padding:10px clamp(14px, 1.2vw, 20px);
+    border-radius:12px !important;
+  }
+
+  .app-header #monthSelect{
+    min-width:150px;
+    max-width:180px;
+    height:44px;
+    font-size:15px;
+  }
+}
+
+@media (min-width:768px) and (max-width:1024px){
+  .topbar.app-header{
+    max-height:none;
+  }
+
+  .app-header .brandbar{
+    display:flex;
+    padding:12px 18px;
+  }
+
+  .app-header .brand-left{
+    display:none;
+  }
+
+  .toolbar-desktop{
+    justify-content:center;
+    gap:12px;
+    max-height:none;
+    overflow:visible;
+  }
+
+  .toolbar-group{
+    gap:9px;
+    padding:4px;
+  }
+
+  .toolbar-actions{
+    flex:1 1 100%;
+    justify-content:center;
+  }
+
+  .app-header .btn,
+  .app-header select{
+    min-height:42px;
+    height:42px;
+    padding:9px 15px;
+    font-size:1.18em;
+    border-radius:12px !important;
+  }
+
+  .app-header #monthSelect{
+    min-width:140px;
+    max-width:180px;
+    height:42px;
+    font-size:1.18em;
+  }
+}
+
+@media (max-width:767px){
+  .topbar.app-header{
+    max-height:none;
+    gap:10px;
+  }
+
+  .app-header .brandbar{
+    display:block;
+    padding:calc(8px + var(--sat)) 10px 8px;
+  }
+
+  .toolbar-mobile{
+    grid-template-columns:48px minmax(0,1fr) 104px;
+    gap:8px;
+    min-height:50px;
+  }
+
+  .mobile-menu-toggle,
+  .mobile-actions-toggle{
+    min-height:44px;
+    height:44px;
+    border-radius:12px !important;
+  }
+
+  .mobile-menu-toggle{
+    width:48px;
+    font-size:20px;
+  }
+
+  .mobile-actions-toggle{
+    width:104px;
+    padding:0 10px;
+    font-size:1.1em;
+  }
+
+  .mobile-month-control .toolbar-month{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:7px;
+  }
+
+  .mobile-month-control #prevBtn,
+  .mobile-month-control #nextBtn{
+    width:auto;
+    min-width:52px;
+    height:44px;
+    min-height:44px;
+    padding:0 10px;
+    border-radius:12px !important;
+  }
+
+  .mobile-month-control #monthSelect{
+    width:100%;
+    min-width:0;
+    max-width:none;
+    height:44px;
+    min-height:44px;
+    padding:8px 10px;
+    border-radius:10px !important;
+    font-size:1.1em;
+  }
+
+  .mobile-actions-panel{
+    left:8px;
+    right:8px;
+    padding:12px;
+    border-radius:16px;
+  }
+
+  .mobile-actions-panel:not([hidden]){
+    gap:10px;
+  }
+
+  .mobile-actions-panel .toolbar-group{
+    gap:10px;
+    padding:10px;
+  }
+
+  .mobile-actions-panel .btn{
+    min-height:44px;
+    height:auto;
+    padding:10px 12px;
+    font-size:1.1em;
+    border-radius:12px !important;
+    white-space:normal;
+  }
+}
+
+/* Header navigation labels: never clip button text. */
+.app-header .btn,
+.app-header button,
+.app-header select{
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:unset;
+  transition:all .2s ease;
+}
+
+.app-header .btn{
+  min-width:max-content;
+  font-size:clamp(.85rem, 1vw, 1.15rem);
+}
+
+.toolbar-desktop .btn{
+  font-size:clamp(.85rem, 1vw, 1.15rem) !important;
+}
+
+.toolbar-desktop .btn::before{
+  content:none !important;
+  display:none !important;
+}
+
+.toolbar-desktop,
+.toolbar-group,
+.toolbar-actions{
+  overflow:visible;
+}
+
+@media (min-width:1201px){
+  .toolbar-desktop{
+    flex-wrap:wrap;
+  }
+
+  .toolbar-actions{
+    flex-wrap:wrap;
+  }
+}
+
+@media (min-width:768px) and (max-width:1200px){
+  .toolbar-desktop{
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  .toolbar-actions{
+    flex:1 1 100%;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  .app-header .btn,
+  .app-header select{
+    font-size:clamp(.85rem, 1.4vw, 1rem);
+  }
+}
+
+@media (max-width:767px){
+  .mobile-menu-toggle{
+    font-size:13px;
+  }
+
+  .mobile-month-control .btn{
+    min-width:52px;
+  }
+
+  .mobile-month-control #prevBtn,
+  .mobile-month-control #nextBtn{
+    font-size:12px !important;
+    color:var(--pea-purple);
+  }
+
+  .mobile-month-control #prevBtn,
+  .mobile-month-control #nextBtn{
+    width:auto;
+    min-width:52px;
+    padding:0 10px;
+    font-size:12px !important;
+    color:var(--pea-purple);
+  }
+
+  .mobile-month-control #prevBtn::before,
+  .mobile-month-control #nextBtn::before{
+    content:none !important;
+    display:none !important;
+  }
+
+  .mobile-actions-panel .btn{
+    min-width:44px;
+    font-size:1rem;
   }
 }
 
