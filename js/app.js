@@ -474,6 +474,11 @@ window.__cameraImage = window.__cameraImage || null;
         e.stopPropagation();
         toggleMobileActionsPanel();
       });
+      mobileActionsPanel?.addEventListener('click', (e)=>{
+        const actionButton = e.target.closest('button');
+        if(!actionButton || !mobileActionsPanel.contains(actionButton)) return;
+        closeMobileActionsPanel();
+      }, true);
       document.addEventListener('click', (e)=>{
         if(!document.body.classList.contains('mobile-actions-open')) return;
         if(e.target.closest('.mobile-actions-panel') || e.target.closest('.mobile-actions-toggle')) return;
@@ -1148,7 +1153,7 @@ function escapeHtml_(s){
 
 
       function render(){
-        titleEl.textContent = `ปฏิทิน ${TH_MONTHS[currentMonth-1]}${BE_YEAR}`;
+        titleEl.textContent = `ปฏิทิน ${TH_MONTHS[currentMonth-1]} ${BE_YEAR}`;
         monthSelect.value = String(currentMonth);
 
         showLoading('กำลังโหลดข้อมูล…');
@@ -3396,7 +3401,7 @@ if(inspectRefreshBtn){
         TH_MONTHS.forEach(function(m,i){
           const o=document.createElement('option');
           o.value=String(i+1);
-          o.textContent=`${m}${BE_YEAR}`;
+          o.textContent=`${m} ${BE_YEAR}`;
           monthSelect.appendChild(o);
         });
         monthSelect.value=String(currentMonth);

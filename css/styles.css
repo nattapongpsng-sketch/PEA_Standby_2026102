@@ -4315,3 +4315,78 @@ legend{
     gap:8px !important;
   }
 }
+
+/* Mobile header fit and action-menu layering fixes. */
+.topbar.app-header{
+  z-index:1000 !important;
+}
+
+.mobile-actions-panel{
+  z-index:1100 !important;
+}
+
+.swal2-container{
+  z-index:30000 !important;
+}
+
+@media (max-width:768px){
+  .topbar.app-header{
+    gap:6px;
+  }
+
+  .app-header .brandbar{
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  .toolbar-mobile{
+    grid-template-columns:42px minmax(0,1fr) 92px !important;
+    gap:6px !important;
+    align-items:center;
+  }
+
+  .mobile-menu-toggle,
+  .mobile-actions-toggle,
+  .mobile-month-control .btn,
+  .mobile-month-control #monthSelect{
+    min-height:40px !important;
+    height:40px !important;
+    font-size:.8rem !important;
+  }
+
+  .mobile-menu-toggle{
+    width:42px !important;
+    padding:0 5px !important;
+  }
+
+  .mobile-actions-toggle{
+    width:92px !important;
+    padding:0 6px !important;
+  }
+
+  .mobile-month-control .toolbar-month{
+    grid-template-columns:auto minmax(96px, 1fr) auto !important;
+    gap:5px !important;
+    width:100%;
+  }
+
+  .mobile-month-control #prevBtn,
+  .mobile-month-control #nextBtn{
+    min-width:40px !important;
+    width:auto !important;
+    padding:0 6px !important;
+    font-size:.78rem !important;
+  }
+
+  .mobile-month-control #monthSelect,
+  .app-header #monthSelect{
+    min-width:96px !important;
+    width:100% !important;
+    max-width:none !important;
+    padding:8px 4px !important;
+    font-size:.78rem !important;
+    text-overflow:clip !important;
+    white-space:nowrap !important;
+    overflow:visible !important;
+  }
+}
