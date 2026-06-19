@@ -115,6 +115,7 @@ const clearPersonFormBtn = $('#clearPersonFormBtn');
       const attPerson=$('#attPerson'), attPersonLabel=$('#attPersonLabel');
       const camStartBtn=$('#camStartBtn'), camSnapBtn=$('#camSnapBtn'), attSubmit=$('#attSubmit');
       const camVideo=$('#camVideo'), camPreview=$('#camPreview'), attGeo=$('#attGeo'), nowClock=$('#nowClock');
+      let camPanel=null, camStatus=null, camRetakeBtn=null, camConfirmBtn=null, camCloseBtn=null;
 
       const expDay = $('#expDay');
       const expDailyBtn = $('#expDailyBtn');
@@ -293,10 +294,10 @@ try{
       let leaderEligibleSet = new Set();  // รายชื่อที่ "เป็นหัวหน้าได้" (อ้างอิง role จาก GS)
       let pdfLinkEl=null;
       let swapSummaryPdfLinkEl=null;
-      let camStream=null, snapData=null;
+      let camStream=null, snapData=null, pendingCameraImage=null;
       
       // ✅ กล้องใหม่ผ่าน GitHub
-const USE_GITHUB_CAMERA = true;
+const USE_GITHUB_CAMERA = false;
 window.__cameraImage = window.__cameraImage || null;
 
       let clockTimer=null;
@@ -642,6 +643,195 @@ window.__cameraImage = window.__cameraImage || null;
       });
     }catch(e){}
   });
+
+  (function initInlineAttendanceCamera(){
+    if(!camStartBtn || !camSnapBtn || !camVideo || !camPreview) return;
+
+    const inlineStartBtn = camStartBtn.cloneNode(true);
+    const inlineSnapBtn = camSnapBtn.cloneNode(true);
+    camStartBtn.replaceWith(inlineStartBtn);
+    camSnapBtn.replaceWith(inlineSnapBtn);
+
+    const startWrap = inlineStartBtn.parentElement;
+    if(startWrap) startWrap.classList.add('camera-start-row');
+
+    camPanel = document.createElement('div');
+    camPanel.id = 'cameraPanel';
+    camPanel.className = 'camera-panel';
+    camPanel.style.display = 'none';
+
+    const mediaWrap = document.createElement('div');
+    mediaWrap.className = 'camera-media';
+    camVideo.parentNode.insertBefore(camPanel, camVideo);
+    mediaWrap.appendChild(camVideo);
+    mediaWrap.appendChild(camPreview);
+
+    const actions = document.createElement('div');
+    actions.className = 'camera-actions';
+
+    inlineSnapBtn.removeAttribute('style');
+    inlineSnapBtn.classList.add('camera-action-btn');
+    actions.appendChild(inlineSnapBtn);
+
+    camRetakeBtn = document.createElement('button');
+    camRetakeBtn.type = 'button';
+    camRetakeBtn.id = 'camRetakeBtn';
+    camRetakeBtn.className = 'btn camera-action-btn';
+    camRetakeBtn.textContent = 'ถ่ายใหม่';
+    actions.appendChild(camRetakeBtn);
+
+    camConfirmBtn = document.createElement('button');
+    camConfirmBtn.type = 'button';
+    camConfirmBtn.id = 'camConfirmBtn';
+    camConfirmBtn.className = 'btn primary camera-action-btn';
+    camConfirmBtn.textContent = 'ยืนยันใช้ภาพนี้';
+    actions.appendChild(camConfirmBtn);
+
+    camCloseBtn = document.createElement('button');
+    camCloseBtn.type = 'button';
+    camCloseBtn.id = 'camCloseBtn';
+    camCloseBtn.className = 'btn camera-action-btn';
+    camCloseBtn.textContent = 'ปิดกล้อง';
+    actions.appendChild(camCloseBtn);
+
+    camStatus = document.createElement('div');
+    camStatus.id = 'camStatus';
+    camStatus.className = 'camera-status hint';
+    camStatus.style.display = 'none';
+
+    camPanel.appendChild(mediaWrap);
+    camPanel.appendChild(actions);
+    camPanel.appendChild(camStatus);
+
+    function setInlineCameraStatus(message, isError){
+      if(!camStatus) return;
+      camStatus.textContent = message || '';
+      camStatus.style.display = message ? 'block' : 'none';
+      camStatus.classList.toggle('error', !!isError);
+    }
+
+    function setInlineCameraMode(mode){
+      inlineStartBtn.style.display = mode === 'idle' ? '' : 'none';
+      inlineSnapBtn.style.display = mode === 'live' ? '' : 'none';
+      camRetakeBtn.style.display = mode === 'preview' ? '' : 'none';
+      camConfirmBtn.style.display = mode === 'preview' ? '' : 'none';
+      camCloseBtn.style.display = mode === 'idle' ? 'none' : '';
+    }
+
+    function restoreConfirmedPreview(){
+      const image = window.__cameraImage || snapData || '';
+      camPreview.src = image;
+      camPreview.style.display = image ? 'block' : 'none';
+      if(camPanel) camPanel.style.display = image ? 'block' : 'none';
+    }
+
+    async function openInlineCamera(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        camPanel.style.display = 'block';
+        setInlineCameraMode('idle');
+        setInlineCameraStatus('ไม่สามารถเปิดกล้องได้ กรุณาใช้อุปกรณ์หรือเบราว์เซอร์ที่รองรับกล้อง', true);
+        try{ Swal.fire('ไม่รองรับกล้อง', 'ไม่สามารถเปิดกล้องได้ กรุณาใช้อุปกรณ์หรือเบราว์เซอร์ที่รองรับกล้อง', 'error'); }catch(e){}
+        return;
+      }
+
+      try{
+        stopCamera();
+        pendingCameraImage = null;
+        camPanel.style.display = 'block';
+        camPreview.style.display = 'none';
+        setInlineCameraStatus('กำลังเปิดกล้อง...');
+
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        });
+
+        camVideo.srcObject = camStream;
+        camVideo.style.display = 'block';
+        setInlineCameraMode('live');
+        setInlineCameraStatus('');
+        await camVideo.play();
+      }catch(err){
+        stopCamera();
+        camPanel.style.display = 'block';
+        camPreview.style.display = (window.__cameraImage || snapData) ? 'block' : 'none';
+        setInlineCameraMode('idle');
+        setInlineCameraStatus('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง', true);
+        try{ Swal.fire('เปิดกล้องไม่สำเร็จ', 'ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง', 'error'); }catch(e){}
+      }
+    }
+
+    inlineStartBtn.addEventListener('click', openInlineCamera);
+
+    inlineSnapBtn.addEventListener('click', ()=>{
+      if(!camVideo?.srcObject){
+        try{ Swal.fire('ยังไม่เปิดกล้อง', 'กรุณาเปิดกล้องก่อน', 'warning'); }catch(e){}
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = camVideo.videoWidth || 640;
+      canvas.height = camVideo.videoHeight || 480;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(camVideo, 0, 0, canvas.width, canvas.height);
+
+      pendingCameraImage = canvas.toDataURL('image/jpeg', 0.9);
+      camPreview.src = pendingCameraImage;
+      camPreview.style.display = 'block';
+      camVideo.style.display = 'none';
+
+      stopCamera();
+      setInlineCameraMode('preview');
+      setInlineCameraStatus('ตรวจสอบภาพ แล้วกดยืนยันใช้ภาพนี้');
+    });
+
+    camRetakeBtn.addEventListener('click', openInlineCamera);
+
+    camConfirmBtn.addEventListener('click', ()=>{
+      if(!pendingCameraImage){
+        try{ Swal.fire('ยังไม่มีภาพถ่าย', 'กรุณาถ่ายภาพก่อนยืนยัน', 'warning'); }catch(e){}
+        return;
+      }
+
+      snapData = pendingCameraImage;
+      window.__cameraImage = pendingCameraImage;
+      pendingCameraImage = null;
+      camPreview.src = snapData;
+      camPreview.style.display = 'block';
+      stopCamera();
+      setInlineCameraMode('idle');
+      setInlineCameraStatus('ใช้ภาพนี้สำหรับการลงชื่อแล้ว');
+    });
+
+    camCloseBtn.addEventListener('click', ()=>{
+      pendingCameraImage = null;
+      stopCamera();
+      restoreConfirmedPreview();
+      setInlineCameraMode('idle');
+      setInlineCameraStatus('');
+    });
+
+    window.addEventListener('beforeunload', stopCamera);
+    window.__resetInlineAttendanceCamera = function(){
+      pendingCameraImage = null;
+      stopCamera();
+      restoreConfirmedPreview();
+      setInlineCameraMode('idle');
+      setInlineCameraStatus('');
+    };
+
+    const originalResetAttendanceForm = resetAttendanceForm;
+    resetAttendanceForm = function(){
+      originalResetAttendanceForm();
+      pendingCameraImage = null;
+      if(camPanel) camPanel.style.display = 'none';
+      setInlineCameraMode('idle');
+      setInlineCameraStatus('');
+    };
+
+    setInlineCameraMode('idle');
+  })();
       
       // ===== Attendance action color =====
       function updateAttActionColor(){
@@ -670,7 +860,12 @@ function showPage(name){
   if(!canOpenAdmin && name === 'admin') name = 'calendar';
   if(!canOpenRules && name === 'rules') name = 'calendar';
 
-  if(name !== 'attendance') stopCamera();
+  if(name !== 'attendance'){
+    stopCamera();
+    if(typeof window.__resetInlineAttendanceCamera === 'function'){
+      window.__resetInlineAttendanceCamera();
+    }
+  }
 
   ['calendar','attendance','swap','admin','rules','handover','map'].forEach(p=>{
     const sec = document.getElementById('page-'+p);

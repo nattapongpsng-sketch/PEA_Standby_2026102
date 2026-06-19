@@ -329,9 +329,39 @@
     .small-note{font-size:.82rem;color:var(--muted);line-height:1.35}
     .note-box{padding:10px 12px;border-radius:12px;border:1px dashed var(--line);background:var(--panel2);}
 
-    /* Camera preview */
-    #camVideo{width:100%;max-height:260px;border-radius:12px;border:1px solid var(--line);background:#000;display:none}
-    #camPreview{width:25%;max-height:260px;border-radius:12px;border:1px solid var(--line);object-fit:cover;display:none}
+    /* Camera panel */
+    .camera-start-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .camera-panel{
+      width:100%;
+      margin:10px 0 14px;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--panel2);
+      box-shadow:0 8px 22px rgba(15,23,42,.08);
+    }
+    .camera-media{display:flex;justify-content:center;width:100%}
+    #camVideo,
+    #camPreview{
+      width:100%;
+      max-width:420px;
+      max-height:320px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      object-fit:cover;
+      display:none;
+    }
+    #camVideo{background:#000}
+    .camera-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+      margin-top:10px;
+    }
+    .camera-action-btn{min-width:130px;flex:1 1 130px}
+    .camera-status{margin-top:8px;text-align:center}
+    .camera-status.error{color:#b42318}
 
     /* ===== Mobile drawer sidebar ===== */
     #sidebarBackdrop{
@@ -1576,7 +1606,9 @@ html.dark .pea-outage-popup textarea{
 
 .btn-camera-border-run{
   position: relative;
-  width: 30%;
+  width: auto;
+  min-width: 260px;
+  max-width: 100%;
   padding: 12px;
   font-size: 14px;
   border-radius: 14px;

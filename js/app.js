@@ -115,6 +115,7 @@ const clearPersonFormBtn = $('#clearPersonFormBtn');
       const attPerson=$('#attPerson'), attPersonLabel=$('#attPersonLabel');
       const camStartBtn=$('#camStartBtn'), camSnapBtn=$('#camSnapBtn'), attSubmit=$('#attSubmit');
       const camVideo=$('#camVideo'), camPreview=$('#camPreview'), attGeo=$('#attGeo'), nowClock=$('#nowClock');
+      let camPanel=null, camStatus=null, camRetakeBtn=null, camConfirmBtn=null, camCloseBtn=null;
 
       const expDay = $('#expDay');
       const expDailyBtn = $('#expDailyBtn');
@@ -293,10 +294,10 @@ try{
       let leaderEligibleSet = new Set();  // รายชื่อที่ "เป็นหัวหน้าได้" (อ้างอิง role จาก GS)
       let pdfLinkEl=null;
       let swapSummaryPdfLinkEl=null;
-      let camStream=null, snapData=null;
+      let camStream=null, snapData=null, pendingCameraImage=null;
       
       // ✅ กล้องใหม่ผ่าน GitHub
-const USE_GITHUB_CAMERA = true;
+const USE_GITHUB_CAMERA = false;
 window.__cameraImage = window.__cameraImage || null;
 
       let clockTimer=null;
