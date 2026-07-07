@@ -143,6 +143,7 @@ const clearPersonFormBtn = $('#clearPersonFormBtn');
       const userInlineName = $('#userInlineName');
 
       const navTabs = document.querySelectorAll('.side-link');
+      const DISABLED_PAGES = new Set(['handover', 'map']);
       const sidebarToggle = $('#sidebarToggle');
       const sidebarBackdrop = $('#sidebarBackdrop');
       const isMobile = () => window.matchMedia('(max-width: 960px)').matches;
@@ -556,7 +557,13 @@ window.__cameraImage = window.__cameraImage || null;
   }
 
   // ✅ เปิดกล้อง: ถ้าเปิดโหมด GitHub ให้เด้งไป GitHub เลย
+  [camStartBtn, camSnapBtn, camVideo, camPreview].forEach(el => {
+    if(el) el.style.display = 'none';
+  });
+
+  // Camera capture is disabled; attendance still records time/location normally.
   camStartBtn?.addEventListener('click', async ()=>{
+    return;
     if(USE_GITHUB_CAMERA){
       openGithubCameraSafe();
       return;
@@ -584,6 +591,7 @@ window.__cameraImage = window.__cameraImage || null;
 
   // ✅ ปุ่มถ่ายภาพเดิม: ใช้เฉพาะตอน USE_GITHUB_CAMERA = false
   camSnapBtn?.addEventListener('click', ()=>{
+    return;
     if(USE_GITHUB_CAMERA){
       Swal.fire('ใช้กล้องใหม่', 'กรุณาถ่ายภาพจากหน้ากล้อง GitHub แล้วกดส่งกลับระบบ', 'info');
       return;
@@ -663,6 +671,7 @@ window.__cameraImage = window.__cameraImage || null;
 }
 
 function showPage(name){
+  if(DISABLED_PAGES.has(name)) name = 'calendar';
   const isEditor = (role === 'editor');
   const isInspector = (role === 'inspector');
   const canOpenAdmin = isEditor || isInspector;
@@ -675,10 +684,10 @@ function showPage(name){
 
   ['calendar','attendance','swap','admin','rules','handover','map'].forEach(p=>{
     const sec = document.getElementById('page-'+p);
-    if(sec) sec.classList.toggle('active', p===name);
+    if(sec) sec.classList.toggle('active', !DISABLED_PAGES.has(p) && p===name);
 
     const tab = document.querySelector('.side-link[data-page="'+p+'"]');
-    if(tab) tab.classList.toggle('active', p===name);
+    if(tab) tab.classList.toggle('active', !DISABLED_PAGES.has(p) && p===name);
   });
 
   if(isMobile()) openMobileSidebar(false);
@@ -716,16 +725,21 @@ function showPage(name){
 
   const tabAdmin = document.querySelector('.side-link[data-page="admin"]');
   const tabRules = document.querySelector('.side-link[data-page="rules"]');
+  const tabHandover = document.querySelector('.side-link[data-page="handover"]');
+  const tabMap = document.querySelector('.side-link[data-page="map"]');
 
   if(tabAdmin) tabAdmin.style.display = canOpenAdmin ? 'flex' : 'none';
   if(tabRules) tabRules.style.display = canOpenRules ? 'flex' : 'none';
+  if(tabHandover) tabHandover.style.display = 'none';
+  if(tabMap) tabMap.style.display = 'none';
 
   const activeTab = document.querySelector('.side-link.active');
   if(
     activeTab &&
     (
       (!canOpenAdmin && activeTab.dataset.page === 'admin') ||
-      (!canOpenRules && activeTab.dataset.page === 'rules')
+      (!canOpenRules && activeTab.dataset.page === 'rules') ||
+      DISABLED_PAGES.has(activeTab.dataset.page)
     )
   ){
     showPage('calendar');
@@ -2886,13 +2900,7 @@ attSubmit.onclick = function () {
   if (!token) { showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
   if (!day || !shift) { showErr('กรุณากรอกข้อมูลให้ครบ'); return; }
   //if (!snapData) { showErr('กรุณาถ่ายภาพก่อนบันทึกการลงชื่อ'); return; }
-  //const photoData = null; // ปิดการใช้ภาพชั่วคราว
-  const photoData = window.__cameraImage || snapData;
-
-if (!photoData) {
-  showErr('กรุณาถ่ายภาพก่อนบันทึกการลงชื่อ');
-  return;
-}
+  // Camera capture is disabled; recordAttendance accepts a null photo payload.
   showLoading('กำลังบันทึกการลงชื่อปฏิบัติงาน…');
 
   // --- NEW: เปิด popup กรอกเหตุขัดข้อง (เฉพาะหัวหน้าเวรตอน OUT) ---
@@ -3965,6 +3973,7 @@ document.getElementById('phonePdfBtn')?.addEventListener('click', () => {
 });
 
 function goToHandoverPageAfterAttendance_(){
+  return;
   try{
     const btn = document.querySelector('.side-link[data-page="handover"]');
     if(btn){

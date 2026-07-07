@@ -3289,6 +3289,19 @@ legend{
   }
 }
 
+/* Temporarily hidden for all users. */
+.side-link[data-page="handover"],
+.side-link[data-page="map"],
+#page-handover,
+#page-map,
+#camStartBtn,
+#camSnapBtn,
+#camVideo,
+#camPreview,
+#cameraPanel{
+  display:none !important;
+}
+
 @media (max-width: 960px){
   body{
     background:var(--bg-main);

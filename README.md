@@ -1,5 +1,29 @@
 # PEA Prasaeng Standby Web
 
+## Current UI Status - 2026-07-07
+
+- หน้าลงชื่อปฏิบัติงานยกเลิกการใช้กล้องแล้ว เหลือการบันทึกเวลาและพิกัดสำหรับการลงชื่อเข้า-ออก
+- ข้อความบนหน้า Attendance ปรับเป็น `ลงชื่อปฏิบัติงาน (บันทึกเวลา + พิกัด)` และ `ตำแหน่งสำหรับการลงชื่อ`
+- การบันทึกลงชื่อยังคงใช้ flow เดิม: ตรวจบัญชีผู้ใช้, วันที่, กะ, ประเภท IN/OUT, ขอพิกัด GPS, แล้วเรียก `recordAttendance(...)`
+- payload รูปภาพส่งเป็น `null` ได้ และไม่มีการบังคับให้ถ่ายภาพก่อนบันทึก
+- เมนู `ส่งมอบ/รับมอบ` และ `แผนที่สถิติไฟฟ้าขัดข้อง` ถูกซ่อนจากทุก user ชั่วคราว และมี guard ใน `showPage(...)` ไม่ให้เปิดสองหน้านี้ผ่าน navigation
+- หลังลงชื่อสำเร็จ ระบบไม่ auto jump ไปหน้า `ส่งมอบ/รับมอบ` แล้ว
+
+Files updated for this state:
+
+- `app/page.js`
+- `legacy.index/index.html`
+- `js/app.js`
+- `public/js/app.js`
+- `css/styles.css`
+- `public/css/styles.css`
+
+Verification:
+
+- `node --check js/app.js`
+- `node --check public/js/app.js`
+- `npm run build`
+
 ## วิธีเปิดดูหน้าเว็บ
 
 โปรเจกต์ `pea-standby-web` เป็น static frontend ที่เรียก Google Apps Script ผ่าน `js/config.js`
