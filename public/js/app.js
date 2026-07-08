@@ -3858,6 +3858,26 @@ function cacheManualEditRosterNames_(names){
   window.__rosterPeople = list;
 }
 
+function saveManualEditShiftNames_(tokenValue, beYear, monthValue, day, shift, picked, onSuccess, onFailure){
+  if(typeof window.callApi === 'function' && window.API_ACTIONS && window.API_ACTIONS.SAVE_ROSTER){
+    window.callApi(window.API_ACTIONS.SAVE_ROSTER, {
+      token: tokenValue,
+      beYear,
+      month: monthValue,
+      day,
+      shift,
+      names: picked || [],
+      operation: 'manualEditShift'
+    }).then(onSuccess).catch(onFailure);
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(onSuccess)
+    .withFailureHandler(onFailure)
+    .manualEditShiftNames(tokenValue, beYear, monthValue, day, shift, picked);
+}
+
 function showManualEditShiftDialog_(day, shift, currentNames, roster, tokenValue){
   const curSet = new Set((currentNames||[]).map(n=>normText_(n)).filter(Boolean));
   const listHtml = (Array.isArray(roster) ? roster : []).map(n=>{
@@ -3916,17 +3936,23 @@ function showManualEditShiftDialog_(day, shift, currentNames, roster, tokenValue
     const picked = res.isDenied ? [] : (res.value || []);
     const m = getUiMonth_();
     showLoading('กำลังบันทึกการแก้ไข...');
-    google.script.run
-      .withSuccessHandler(function(){
+    saveManualEditShiftNames_(
+      tokenValue,
+      window.BE_YEAR,
+      m,
+      day,
+      shift,
+      picked,
+      function(){
         hideLoading();
         showOK('บันทึกแล้ว');
         refreshUI_();
-      })
-      .withFailureHandler(function(e){
+      },
+      function(e){
         hideLoading();
         showErr(e.message || 'บันทึกไม่สำเร็จ');
-      })
-      .manualEditShiftNames(tokenValue, window.BE_YEAR, m, day, shift, picked);
+      }
+    );
   });
 }
 
@@ -3951,6 +3977,8 @@ function openManualEditShift_(day, shift, currentNames){
       cacheManualEditRosterNames_(names);
 
       const roster = Array.isArray(names) ? names : [];
+      showManualEditShiftDialog_(day, shift, currentNames, roster, tk);
+      return;
       const curSet = new Set((currentNames||[]).map(n=>normText_(n)).filter(Boolean));
 
       const listHtml = roster.map(n=>{
