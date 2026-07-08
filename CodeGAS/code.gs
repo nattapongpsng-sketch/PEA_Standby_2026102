@@ -1134,6 +1134,11 @@ const API_LEGACY_FUNCTION_ALLOWLIST_ = {
   inspectSwapRequest: true,
   approveRequest: true,
   respondCovererSwap: true,
+  covererRespondSwapRequest: true,
+  respondToSwapRequest: true,
+  respondSwapRequest: true,
+  respondSwapOffer: true,
+  acceptSwapRequest: true,
   covererRespond: true,
   respondCoverer: true,
   respondCovererRequest: true,
@@ -3149,6 +3154,11 @@ function covererRespond(token, id, decision){
 function respondCoverer(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
 function respondCovererRequest(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
 function covererDecision(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
+function covererRespondSwapRequest(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
+function respondToSwapRequest(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
+function respondSwapRequest(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
+function respondSwapOffer(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
+function acceptSwapRequest(token, id, accept){ return respondCovererSwap(token, id, !!accept); }
 function covererAcceptRequest(token, id){ return respondCovererSwap(token, id, true); }
 function covererRejectRequest(token, id){ return respondCovererSwap(token, id, false); }
 

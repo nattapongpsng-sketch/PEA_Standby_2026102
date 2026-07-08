@@ -115,7 +115,25 @@
       }
 
       case "listInboxForCoverer":
-        return [];
+        return callApiFunction_("listInboxForCoverer", [a[0], a[1]]);
+
+      case "covererRespondSwapRequest":
+      case "respondToSwapRequest":
+      case "respondSwapRequest":
+      case "respondSwapOffer":
+      case "acceptSwapRequest":
+      case "covererDecision":
+      case "covererRespond":
+      case "respondCoverer":
+      case "respondCovererRequest":
+      case "respondCovererSwap":
+        return callApiFunction_("respondCovererSwap", [a[0], a[1], !!a[2]]);
+
+      case "covererAcceptRequest":
+        return callApiFunction_("respondCovererSwap", [a[0], a[1], true]);
+
+      case "covererRejectRequest":
+        return callApiFunction_("respondCovererSwap", [a[0], a[1], false]);
 
       case "getRosterPeople": {
         const data = await callApi(API_ACTIONS.GET_CONFIG, { token });

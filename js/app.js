@@ -1721,13 +1721,16 @@ async function confirmCovererTwoStep(isAccept, r){
         if(!currentPersonName){ showErr('บัญชีนี้ยังไม่ผูกชื่อใน Users/ชีต1'); return; }
 
         const CANDIDATES = [
+          'respondCovererSwap',
+          'covererRespond',
+          'respondCoverer',
+          'respondCovererRequest',
+          'covererDecision',
           'covererRespondSwapRequest',
           'respondToSwapRequest',
           'respondSwapRequest',
           'respondSwapOffer',
-          'acceptSwapRequest',
-          'covererDecision',
-          'covererRespond'
+          'acceptSwapRequest'
         ];
 
         const actionText = accept ? 'ยอมรับ' : 'ปฏิเสธ';
@@ -1756,7 +1759,10 @@ async function confirmCovererTwoStep(isAccept, r){
                 const looksLikeMissing =
                   msg.includes('is not a function') ||
                   msg.includes('not defined') ||
-                  msg.includes('No signature of method');
+                  msg.includes('No signature of method') ||
+                  msg.includes('Function is not allowed') ||
+                  msg.includes('Unknown action: callFunction') ||
+                  msg.includes('Backend ยังไม่รองรับ callFunction');
                 if(looksLikeMissing) tryCall(idx+1);
                 else { hideLoading(); showErr(msg || `ทำรายการ${actionText}ไม่สำเร็จ`); }
               });
