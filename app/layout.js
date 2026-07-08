@@ -1,8 +1,8 @@
 import LegacyScripts from "./legacy-scripts";
 
 export const metadata = {
-  title: "PEA Phrasaeng Standby",
-  description: "PEA Prasaeng Standby Web Application",
+  title: "PEA Chaiburi Standby",
+  description: "PEA Chaiburi Standby Web Application",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
