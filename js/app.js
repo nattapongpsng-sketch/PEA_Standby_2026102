@@ -3648,7 +3648,7 @@ function getManualEditRosterNames_(currentNames){
     out.push(name);
   };
 
-  (Array.isArray(rosterNames) ? rosterNames : []).forEach(add);
+  (typeof rosterNames !== 'undefined' && Array.isArray(rosterNames) ? rosterNames : []).forEach(add);
   (Array.isArray(window.__rosterPeople) ? window.__rosterPeople : []).forEach(add);
   (Array.isArray(currentNames) ? currentNames : []).forEach(add);
   return out;
@@ -3657,7 +3657,7 @@ function getManualEditRosterNames_(currentNames){
 function cacheManualEditRosterNames_(names){
   const list = getManualEditRosterNames_(names);
   if(!list.length) return;
-  rosterNames = list;
+  if(typeof rosterNames !== 'undefined') rosterNames = list;
   window.__rosterPeople = list;
 }
 
