@@ -3636,7 +3636,7 @@ if(token){
   }
 })();
 
-function getManualEditRosterNames_(currentNames){
+function getManualEditRosterNames_(currentNames, includeCurrentNames){
   const out = [];
   const seen = new Set();
   const add = function(value){
@@ -3650,12 +3650,14 @@ function getManualEditRosterNames_(currentNames){
 
   (typeof rosterNames !== 'undefined' && Array.isArray(rosterNames) ? rosterNames : []).forEach(add);
   (Array.isArray(window.__rosterPeople) ? window.__rosterPeople : []).forEach(add);
-  (Array.isArray(currentNames) ? currentNames : []).forEach(add);
+  if(includeCurrentNames === true){
+    (Array.isArray(currentNames) ? currentNames : []).forEach(add);
+  }
   return out;
 }
 
 function cacheManualEditRosterNames_(names){
-  const list = getManualEditRosterNames_(names);
+  const list = getManualEditRosterNames_(names, true);
   if(!list.length) return;
   if(typeof rosterNames !== 'undefined') rosterNames = list;
   window.__rosterPeople = list;
@@ -3740,8 +3742,8 @@ function openManualEditShift_(day, shift, currentNames){
   if(!tk){ showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
   if(rl !== 'editor'){ showErr('ท่านไม่มีสิทธิ์ดำเนินการ'); return; }
 
-  const cachedRoster = getManualEditRosterNames_(currentNames);
-  if(cachedRoster.length){
+  const cachedRoster = getManualEditRosterNames_(null, false);
+  if(cachedRoster.length > (Array.isArray(currentNames) ? currentNames.length : 0)){
     showManualEditShiftDialog_(day, shift, currentNames, cachedRoster, tk);
     return;
   }
