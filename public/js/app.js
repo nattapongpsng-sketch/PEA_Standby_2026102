@@ -3831,6 +3831,103 @@ if(token){
   }
 })();
 
+function getManualEditRosterNames_(currentNames){
+  const out = [];
+  const seen = new Set();
+  const add = function(value){
+    const name = normText_(value && typeof value === 'object' ? (value.name || value.personName || value.fullname || '') : value);
+    if(!name) return;
+    const key = name.toLowerCase();
+    if(seen.has(key)) return;
+    seen.add(key);
+    out.push(name);
+  };
+
+  (Array.isArray(rosterNames) ? rosterNames : []).forEach(add);
+  (Array.isArray(window.__rosterPeople) ? window.__rosterPeople : []).forEach(add);
+  (Array.isArray(currentNames) ? currentNames : []).forEach(add);
+  return out;
+}
+
+function cacheManualEditRosterNames_(names){
+  const list = getManualEditRosterNames_(names);
+  if(!list.length) return;
+  rosterNames = list;
+  window.__rosterPeople = list;
+}
+
+function showManualEditShiftDialog_(day, shift, currentNames, roster, tokenValue){
+  const curSet = new Set((currentNames||[]).map(n=>normText_(n)).filter(Boolean));
+  const listHtml = (Array.isArray(roster) ? roster : []).map(n=>{
+    const nn = normText_(n);
+    const checked = curSet.has(nn) ? 'checked' : '';
+    return `
+      <label style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.08)">
+        <input type="checkbox" class="me-name" value="${escapeHtml_(n)}" ${checked}/>
+        <span>${escapeHtml_(n)}</span>
+      </label>
+    `;
+  }).join('');
+
+  Swal.fire({
+    title: `แก้ไขเวร (วันที่ ${day} / กะ ${shift})`,
+    html: `
+      <div style="text-align:left">
+        <div class="muted" style="margin-bottom:8px">
+          เลือก/ยกเลิกรายชื่อได้ - ถ้าไม่เลือกเลย = ลบทั้งบรรทัดกะนี้
+        </div>
+        <div class="pea-picklist">
+          ${listHtml || '<div class="muted">ไม่พบรายชื่อพนักงาน</div>'}
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    showDenyButton: true,
+    confirmButtonText: 'บันทึก',
+    denyButtonText: 'ล้างทั้งหมด',
+    cancelButtonText: 'ยกเลิก',
+    buttonsStyling: false,
+    customClass: {
+      popup: 'pea-swal',
+      confirmButton: 'btn primary',
+      denyButton: 'btn danger',
+      cancelButton: 'btn'
+    },
+    preConfirm: () => {
+      const cbs = Array.from(document.querySelectorAll('.me-name'));
+      const picked = cbs.filter(x=>x.checked).map(x=>normText_(x.value)).filter(Boolean);
+      const seen = new Set();
+      const dup = [];
+      picked.forEach(n=>{
+        const k = normText_(n);
+        if(seen.has(k)) dup.push(n);
+        seen.add(k);
+      });
+      if(dup.length){
+        Swal.showValidationMessage('รายชื่อซ้ำกัน: ' + Array.from(new Set(dup)).join(', '));
+        return false;
+      }
+      return picked;
+    }
+  }).then(res=>{
+    if(res.isDismissed) return;
+    const picked = res.isDenied ? [] : (res.value || []);
+    const m = getUiMonth_();
+    showLoading('กำลังบันทึกการแก้ไข...');
+    google.script.run
+      .withSuccessHandler(function(){
+        hideLoading();
+        showOK('บันทึกแล้ว');
+        refreshUI_();
+      })
+      .withFailureHandler(function(e){
+        hideLoading();
+        showErr(e.message || 'บันทึกไม่สำเร็จ');
+      })
+      .manualEditShiftNames(tokenValue, window.BE_YEAR, m, day, shift, picked);
+  });
+}
+
 function openManualEditShift_(day, shift, currentNames){
   const tk = (window.__token) || (function(){ try{return sessionStorage.getItem('pea_token');}catch(e){return null;} })();
   const rl = (window.__role)  || (function(){ try{return sessionStorage.getItem('pea_role')||'viewer';}catch(e){return 'viewer';} })();
@@ -3838,11 +3935,18 @@ function openManualEditShift_(day, shift, currentNames){
   if(!tk){ showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
   if(rl !== 'editor'){ showErr('ท่านไม่มีสิทธิ์ดำเนินการ'); return; }
 
+  const cachedRoster = getManualEditRosterNames_(currentNames);
+  if(cachedRoster.length){
+    showManualEditShiftDialog_(day, shift, currentNames, cachedRoster, tk);
+    return;
+  }
+
   showLoading('กำลังโหลดรายชื่อ…');
 
   google.script.run
     .withSuccessHandler(function(names){
       hideLoading();
+      cacheManualEditRosterNames_(names);
 
       const roster = Array.isArray(names) ? names : [];
       const curSet = new Set((currentNames||[]).map(n=>normText_(n)).filter(Boolean));

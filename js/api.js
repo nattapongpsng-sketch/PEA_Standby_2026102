@@ -140,6 +140,11 @@
         return data && Array.isArray(data.rosterPeople) ? data.rosterPeople : [];
       }
 
+      case "listPeopleNames": {
+        const data = await callApi(API_ACTIONS.GET_CONFIG, { token: a[0] || token });
+        return data && Array.isArray(data.rosterPeople) ? data.rosterPeople : [];
+      }
+
       case "getRosterPeopleFull": {
         const data = await callApi(API_ACTIONS.GET_CONFIG, { token: a[0] });
         const people = data && Array.isArray(data.rosterPeople) ? data.rosterPeople : [];
