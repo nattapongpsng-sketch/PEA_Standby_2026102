@@ -1492,21 +1492,31 @@ function escapeHtml_(s){
 
 
       function populateRequesterFromDayShift(){
-        if(!lastMonthData){
+        const loginName = normText_(currentPersonName || window.__personName || '');
+        function setRequesterFallback_(){
           rqRequester.innerHTML='';
-          fillCovererSelect(null);
-          rqSubmit.disabled=true;
+          if(loginName){
+            const o=document.createElement('option');
+            o.value=o.textContent=loginName;
+            rqRequester.appendChild(o);
+          }
+          fillCovererSelect(loginName ? new Set([loginName]) : null);
+          validateSwapForm();
+        }
+
+        if(!lastMonthData){
+          setRequesterFallback_();
           return;
         }
         const day=parseInt(rqDay.value,10), shift=rqShift.value;
         rqRequester.innerHTML='';
-        if(!day){ fillCovererSelect(null); rqSubmit.disabled=true; return; }
+        if(!day){ setRequesterFallback_(); return; }
 
         const d=lastMonthData.days.find(x=>x.day==day);
-        if(!d){ fillCovererSelect(null); rqSubmit.disabled=true; return; }
+        if(!d){ setRequesterFallback_(); return; }
 
         const it=(d.items||[]).find(i=> normText_(i.text).startsWith('กะ'+shift));
-        if(!it){ fillCovererSelect(null); rqSubmit.disabled=true; return; }
+        if(!it){ setRequesterFallback_(); return; }
 
         let namesInShift = it.text ? extractNames(it.text) : [];
         const hasR = dayHasReserve_(d);
@@ -1521,7 +1531,19 @@ function escapeHtml_(s){
           rqRequester.appendChild(o);
         });
 
-        fillCovererSelect(exclude);
+        if(loginName){
+          const match = Array.from(rqRequester.options).find(o => normText_(o.value).toLowerCase() === loginName.toLowerCase());
+          if(match){
+            rqRequester.value = match.value;
+          }else{
+            const o=document.createElement('option');
+            o.value=o.textContent=loginName;
+            rqRequester.appendChild(o);
+            rqRequester.value=loginName;
+          }
+        }
+
+        fillCovererSelect(new Set([...(exclude || []), ...(loginName ? [loginName] : [])]));
         validateSwapForm();
       }
       rqDay.onchange=rqShift.onchange=populateRequesterFromDayShift;
@@ -3362,26 +3384,19 @@ function escapeHtml_(text) {
     }
   }
 
-  // เงื่อนไขใหม่: OUT + หัวหน้าเวร => popup ก่อน
+  // OUT must collect outage summary before saving.
   if (action === 'OUT') {
-    checkIsLeaderOut_(async function (err, isLeader) {
-      if (err) { hideLoading(); showErr(err.message || 'ตรวจสอบหัวหน้าเวรไม่สำเร็จ'); return; }
+    (async function(){
+      hideLoading();
+      const payload = await askOutageDetailsPopup_();
+      if (!payload) { showErr('ยกเลิกการลงชื่อออก'); return; }
 
-      if (isLeader) {
-        hideLoading(); // ซ่อน loading ก่อนเปิด popup
-        const payload = await askOutageDetailsPopup_();
-        if (!payload) { showErr('ยกเลิกการลงชื่อออก'); return; }
-
-        showLoading('กำลังบันทึกการลงชื่อออก…');
-        proceedWithGeoAndSend({
-  type: 'OUTAGE_SUMMARY',
-  ...payload
-});
-      } else {
-        // ไม่ใช่หัวหน้าเวร -> ออกได้เลย (ไม่ถาม)
-        proceedWithGeoAndSend(null);
-      }
-    });
+      showLoading('กำลังบันทึกการลงชื่อออก...');
+      proceedWithGeoAndSend({
+        type: 'OUTAGE_SUMMARY',
+        ...payload
+      });
+    })();
   } else {
     // IN -> ปกติ
     proceedWithGeoAndSend(null);
